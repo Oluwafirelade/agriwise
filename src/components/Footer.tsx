@@ -125,7 +125,7 @@ export function Footer() {
         <div className="mt-12 pt-8 border-t border-sidebar-border">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-sm text-sidebar-foreground/60">
-              © 2024 AgriAdvisor. All rights reserved.
+              © 2025 AgriAdvisor. All rights reserved.
             </p>
             <div className="flex gap-6">
               <a href="#" className="text-sm text-sidebar-foreground/60 hover:text-sidebar-primary transition-colors">

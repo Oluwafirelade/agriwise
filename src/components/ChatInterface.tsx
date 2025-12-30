@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Send, Mic, MicOff, Bot, User, Loader2, Sparkles } from "lucide-react";
+import { Send, Mic, MicOff, Bot, User, Loader2, Sparkles, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LanguageSelector, languages } from "./LanguageSelector";
 
@@ -9,6 +9,13 @@ interface Message {
   content: string;
   timestamp: Date;
 }
+
+// Type definitions for Web Speech API
+type SpeechRecognitionErrorEvent = Event & { error: string };
+type SpeechRecognitionEvent = Event & { 
+  results: SpeechRecognitionResultList;
+  isFinal: boolean;
+};
 
 const sampleQueries = [
   { en: "My cassava leaves are turning yellow", ha: "Ganyen rogo na ya zama rawaya", yo: "Ewé ẹ̀gẹ́ mi di pupa", ig: "Akwụkwọ akpụ m na-acha odo odo" },
@@ -34,11 +41,83 @@ export function ChatInterface({ selectedLanguage, onLanguageChange }: ChatInterf
   const [input, setInput] = useState("");
   const [isRecording, setIsRecording] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [transcript, setTranscript] = useState("");
+  const [recordingError, setRecordingError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const recognitionRef = useRef<any>(null);
+  const transcriptRef = useRef<string>("");
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
+
+  // Initialize Speech Recognition
+  useEffect(() => {
+    const SpeechRecognition =
+      (window as any).SpeechRecognition ||
+      (window as any).webkitSpeechRecognition ||
+      (window as any).mozSpeechRecognition ||
+      (window as any).msSpeechRecognition;
+
+    if (SpeechRecognition) {
+      recognitionRef.current = new SpeechRecognition();
+      const recognition = recognitionRef.current;
+
+      // Set recognition properties
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = getLanguageCode(selectedLanguage);
+
+      // Handle recognition results
+      recognition.onresult = (event: SpeechRecognitionEvent) => {
+        let interimTranscript = "";
+
+        for (let i = event.results.length - 1; i >= 0; --i) {
+          const transcript = event.results[i][0].transcript;
+
+          if (event.results[i].isFinal) {
+            transcriptRef.current += transcript + " ";
+          } else {
+            interimTranscript += transcript;
+          }
+        }
+
+        setTranscript(transcriptRef.current + interimTranscript);
+      };
+
+      // Handle recognition errors
+      recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+        const errorMap: Record<string, string> = {
+          "no-speech": "No speech detected. Please try again.",
+          "audio-capture": "No microphone found. Please check permissions.",
+          "network": "Network error. Please check your connection.",
+          "permission-denied":
+            "Microphone permission denied. Please enable it in settings.",
+          "not-allowed": "Microphone access not allowed.",
+        };
+
+        const errorMessage =
+          errorMap[event.error] ||
+          `Speech recognition error: ${event.error}`;
+        setRecordingError(errorMessage);
+        setIsRecording(false);
+      };
+
+      // Handle recognition end
+      recognition.onend = () => {
+        if (transcriptRef.current.trim()) {
+          setInput(transcriptRef.current.trim());
+        }
+        setIsRecording(false);
+      };
+    }
+
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.abort();
+      }
+    };
+  }, [selectedLanguage]);
 
   useEffect(() => {
     scrollToBottom();
@@ -62,6 +141,17 @@ export function ChatInterface({ selectedLanguage, onLanguageChange }: ChatInterf
       ig: "Nnọọ na AgriAdvisor! Anọ m ebe a iji nyere gị aka na ajụjụ ọrụ ugbo. Jụọ m ihe ọ bụla gbasara ihe ọkụkụ, ụmụ ahụhụ, ala, ma ọ bụ omume ọrụ ugbo. Kedu ka m ga-esi nyere gị aka taa?",
     };
     return messages[lang] || messages.en;
+  }
+
+  // Map UI language codes to Web Speech API language codes
+  function getLanguageCode(lang: string): string {
+    const languageMap: Record<string, string> = {
+      en: "en-US",
+      ha: "ha-NG", // Hausa - Nigeria
+      yo: "yo-NG", // Yoruba - Nigeria
+      ig: "ig-NG", // Igbo - Nigeria
+    };
+    return languageMap[lang] || "en-US";
   }
 
   const handleSend = async () => {
@@ -105,8 +195,29 @@ export function ChatInterface({ selectedLanguage, onLanguageChange }: ChatInterf
   };
 
   const toggleRecording = () => {
-    setIsRecording(!isRecording);
-    // Voice recording would be implemented here
+    if (!recognitionRef.current) {
+      setRecordingError("Speech recognition not supported in your browser.");
+      return;
+    }
+
+    if (isRecording) {
+      recognitionRef.current.stop();
+      setIsRecording(false);
+      setTranscript("");
+      transcriptRef.current = "";
+    } else {
+      try {
+        setRecordingError(null);
+        transcriptRef.current = "";
+        setTranscript("");
+        recognitionRef.current.lang = getLanguageCode(selectedLanguage);
+        recognitionRef.current.start();
+        setIsRecording(true);
+      } catch (error) {
+        setRecordingError("Failed to start recording. Please try again.");
+        setIsRecording(false);
+      }
+    }
   };
 
   return (
@@ -211,12 +322,31 @@ export function ChatInterface({ selectedLanguage, onLanguageChange }: ChatInterf
 
             {/* Input Area */}
             <div className="px-6 py-4 border-t border-border/50 bg-background">
+              {/* Error Message */}
+              {recordingError && (
+                <div className="mb-3 flex items-center gap-2 bg-destructive/10 border border-destructive/20 rounded-lg px-3 py-2">
+                  <AlertCircle className="w-4 h-4 text-destructive flex-shrink-0" />
+                  <p className="text-xs text-destructive">{recordingError}</p>
+                </div>
+              )}
+
+              {/* Recording Transcript */}
+              {transcript && (
+                <div className="mb-3 bg-primary/5 border border-primary/20 rounded-lg px-3 py-2">
+                  <p className="text-xs text-muted-foreground mb-1">
+                    {isRecording ? "Listening..." : "Recognized text:"}
+                  </p>
+                  <p className="text-sm text-foreground italic">{transcript}</p>
+                </div>
+              )}
+
               <div className="flex items-center gap-3">
                 <Button
                   variant={isRecording ? "destructive" : "outline"}
                   size="icon"
                   onClick={toggleRecording}
                   className="flex-shrink-0"
+                  title={isRecording ? "Stop recording" : "Start recording"}
                 >
                   {isRecording ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
                 </Button>
