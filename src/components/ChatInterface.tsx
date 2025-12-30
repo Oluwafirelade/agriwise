@@ -10,13 +10,6 @@ interface Message {
   timestamp: Date;
 }
 
-// Type definitions for Web Speech API
-type SpeechRecognitionErrorEvent = Event & { error: string };
-type SpeechRecognitionEvent = Event & { 
-  results: SpeechRecognitionResultList;
-  isFinal: boolean;
-};
-
 const sampleQueries = [
   { en: "My cassava leaves are turning yellow", ha: "Ganyen rogo na ya zama rawaya", yo: "Ewé ẹ̀gẹ́ mi di pupa", ig: "Akwụkwọ akpụ m na-acha odo odo" },
   { en: "When should I plant maize?", ha: "Yaushe zan dasa masara?", yo: "Nigba wo ni mo yẹ ki n gbin agbado?", ig: "Kedu oge m ga-akụ ọka?" },
@@ -27,6 +20,28 @@ const sampleQueries = [
 interface ChatInterfaceProps {
   selectedLanguage: string;
   onLanguageChange: (code: string) => void;
+}
+
+// Helper function to get welcome message
+function getWelcomeMessage(lang: string): string {
+  const messages: Record<string, string> = {
+    en: "Welcome to AgriAdvisor! I'm here to help you with farming questions. Ask me anything about crops, pests, soil, or farming practices. How can I assist you today?",
+    ha: "Barka da zuwa AgriAdvisor! Ina nan don taimaka muku da tambayoyin noma. Tambaye ni komai game da amfanin gona, kwari, ƙasa, ko ayyukan noma. Yaya zan iya taimaka muku yau?",
+    yo: "Kaabo si AgriAdvisor! Mo wa nibi lati ran ọ lọwọ pẹlu awọn ibeere ogbin. Beere lọwọ mi ohunkohun nipa awọn irugbin, awọn kokoro, ilẹ, tabi awọn iṣe ogbin. Bawo ni mo le ran ọ lọwọ loni?",
+    ig: "Nnọọ na AgriAdvisor! Anọ m ebe a iji nyere gị aka na ajụjụ ọrụ ugbo. Jụọ m ihe ọ bụla gbasara ihe ọkụkụ, ụmụ ahụhụ, ala, ma ọ bụ omume ọrụ ugbo. Kedu ka m ga-esi nyere gị aka taa?",
+  };
+  return messages[lang] || messages.en;
+}
+
+// Helper function to map UI language codes to Web Speech API language codes
+function getLanguageCode(lang: string): string {
+  const languageMap: Record<string, string> = {
+    en: "en-US",
+    ha: "ha-NG", // Hausa - Nigeria
+    yo: "yo-NG", // Yoruba - Nigeria
+    ig: "ig-NG", // Igbo - Nigeria
+  };
+  return languageMap[lang] || "en-US";
 }
 
 export function ChatInterface({ selectedLanguage, onLanguageChange }: ChatInterfaceProps) {
@@ -69,7 +84,7 @@ export function ChatInterface({ selectedLanguage, onLanguageChange }: ChatInterf
       recognition.lang = getLanguageCode(selectedLanguage);
 
       // Handle recognition results
-      recognition.onresult = (event: SpeechRecognitionEvent) => {
+      recognition.onresult = (event: any) => {
         let interimTranscript = "";
 
         for (let i = event.results.length - 1; i >= 0; --i) {
@@ -86,7 +101,7 @@ export function ChatInterface({ selectedLanguage, onLanguageChange }: ChatInterf
       };
 
       // Handle recognition errors
-      recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+      recognition.onerror = (event: any) => {
         const errorMap: Record<string, string> = {
           "no-speech": "No speech detected. Please try again.",
           "audio-capture": "No microphone found. Please check permissions.",
@@ -108,6 +123,9 @@ export function ChatInterface({ selectedLanguage, onLanguageChange }: ChatInterf
         if (transcriptRef.current.trim()) {
           setInput(transcriptRef.current.trim());
         }
+        // Clear transcript display and reset for next recording
+        setTranscript("");
+        transcriptRef.current = "";
         setIsRecording(false);
       };
     }
@@ -117,11 +135,18 @@ export function ChatInterface({ selectedLanguage, onLanguageChange }: ChatInterf
         recognitionRef.current.abort();
       }
     };
-  }, [selectedLanguage]);
+  }, []);
 
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Update speech recognition language when selected language changes
+  useEffect(() => {
+    if (recognitionRef.current) {
+      recognitionRef.current.lang = getLanguageCode(selectedLanguage);
+    }
+  }, [selectedLanguage]);
 
   useEffect(() => {
     // Update welcome message when language changes
@@ -132,27 +157,6 @@ export function ChatInterface({ selectedLanguage, onLanguageChange }: ChatInterf
       timestamp: new Date(),
     }]);
   }, [selectedLanguage]);
-
-  function getWelcomeMessage(lang: string): string {
-    const messages: Record<string, string> = {
-      en: "Welcome to AgriAdvisor! I'm here to help you with farming questions. Ask me anything about crops, pests, soil, or farming practices. How can I assist you today?",
-      ha: "Barka da zuwa AgriAdvisor! Ina nan don taimaka muku da tambayoyin noma. Tambaye ni komai game da amfanin gona, kwari, ƙasa, ko ayyukan noma. Yaya zan iya taimaka muku yau?",
-      yo: "Kaabo si AgriAdvisor! Mo wa nibi lati ran ọ lọwọ pẹlu awọn ibeere ogbin. Beere lọwọ mi ohunkohun nipa awọn irugbin, awọn kokoro, ilẹ, tabi awọn iṣe ogbin. Bawo ni mo le ran ọ lọwọ loni?",
-      ig: "Nnọọ na AgriAdvisor! Anọ m ebe a iji nyere gị aka na ajụjụ ọrụ ugbo. Jụọ m ihe ọ bụla gbasara ihe ọkụkụ, ụmụ ahụhụ, ala, ma ọ bụ omume ọrụ ugbo. Kedu ka m ga-esi nyere gị aka taa?",
-    };
-    return messages[lang] || messages.en;
-  }
-
-  // Map UI language codes to Web Speech API language codes
-  function getLanguageCode(lang: string): string {
-    const languageMap: Record<string, string> = {
-      en: "en-US",
-      ha: "ha-NG", // Hausa - Nigeria
-      yo: "yo-NG", // Yoruba - Nigeria
-      ig: "ig-NG", // Igbo - Nigeria
-    };
-    return languageMap[lang] || "en-US";
-  }
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
@@ -201,10 +205,8 @@ export function ChatInterface({ selectedLanguage, onLanguageChange }: ChatInterf
     }
 
     if (isRecording) {
+      // Stop recording - let onend handler manage cleanup and input population
       recognitionRef.current.stop();
-      setIsRecording(false);
-      setTranscript("");
-      transcriptRef.current = "";
     } else {
       try {
         setRecordingError(null);
