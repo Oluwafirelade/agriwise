@@ -2,6 +2,7 @@ import { Sprout, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { LanguageSelector } from "./LanguageSelector";
+import { ThemeToggle } from "./ThemeToggle";
 
 interface HeaderProps {
   selectedLanguage: string;
@@ -44,7 +45,8 @@ export function Header({ selectedLanguage, onLanguageChange }: HeaderProps) {
           </nav>
 
           {/* Actions */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 md:gap-3">
+            <ThemeToggle />
             <LanguageSelector 
               selectedLanguage={selectedLanguage}
               onLanguageChange={onLanguageChange}
