@@ -1,12 +1,15 @@
 import { ArrowRight, MessageCircle, Globe2, Leaf } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { getTranslation, LanguageCode } from "@/lib/translations";
 import heroImage from "@/assets/hero-farm.jpg";
 
 interface HeroSectionProps {
   onStartChat: () => void;
+  selectedLanguage?: string;
 }
 
-export function HeroSection({ onStartChat }: HeroSectionProps) {
+export function HeroSection({ onStartChat, selectedLanguage = "en" }: HeroSectionProps) {
+  const t = (key: string) => getTranslation(selectedLanguage as LanguageCode, key as any);
   return (
     <section className="relative min-h-screen flex items-center pt-20 overflow-hidden">
       {/* Background Image with Overlay */}
@@ -28,49 +31,47 @@ export function HeroSection({ onStartChat }: HeroSectionProps) {
           {/* Badge */}
           <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-full px-4 py-2 mb-6 animate-fade-in">
             <Leaf className="w-4 h-4 text-primary" />
-            <span className="text-sm font-medium text-primary">AI-Powered Agricultural Guidance</span>
+            <span className="text-sm font-medium text-primary">{t("heroBadge")}</span>
           </div>
 
           {/* Main Headline */}
           <h1 className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-foreground mb-6 leading-tight animate-slide-up">
-            Farm Smarter with{" "}
-            <span className="text-gradient-warm">Multilingual</span>{" "}
-            <span className="text-primary">AI Advisory</span>
+            {t("heroHeadline1")}{" "}
+            <span className="text-gradient-warm">{t("heroHeadline2")}</span>{" "}
+            <span className="text-primary">{t("heroHeadline3")}</span>
           </h1>
 
           {/* Subheadline */}
           <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl animate-slide-up" style={{ animationDelay: "0.1s" }}>
-            Get personalized farming advice in your native language. Our intelligent platform 
-            understands Hausa, Yoruba, Igbo, and English — helping Nigerian farmers make 
-            better decisions for healthier crops and higher yields.
+            {t("heroSubheading")}
           </p>
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 mb-12 animate-slide-up" style={{ animationDelay: "0.2s" }}>
             <Button variant="hero" size="xl" onClick={onStartChat} className="group">
               <MessageCircle className="w-5 h-5" />
-              Start Asking Questions
+              {t("heroButtonStart")}
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Button>
             <Button variant="outline" size="xl">
               <Globe2 className="w-5 h-5" />
-              Explore Languages
+              {t("heroButtonExplore")}
             </Button>
           </div>
 
           {/* Stats */}
           <div className="grid grid-cols-3 gap-6 md:gap-8 animate-fade-in" style={{ animationDelay: "0.3s" }}>
             <div className="text-center sm:text-left">
-              <div className="font-display text-3xl md:text-4xl font-bold text-primary">4+</div>
-              <div className="text-sm text-muted-foreground">Languages Supported</div>
+              <div className="font-display text-3xl md:text-4xl font-bold text-primary">{t("heroStat1Value")}</div>
+              <div className="text-sm text-muted-foreground">{t("heroStat1Title")}</div>
             </div>
             <div className="text-center sm:text-left">
-              <div className="font-display text-3xl md:text-4xl font-bold text-secondary">24/7</div>
-              <div className="text-sm text-muted-foreground">Always Available</div>
+              <div className="font-display text-3xl md:text-4xl font-bold text-secondary">{t("heroStat2Value")}</div>
+              <div className="text-sm text-muted-foreground">{t("heroStat2Title")}</div>
             </div>
             <div className="text-center sm:text-left">
-              <div className="font-display text-3xl md:text-4xl font-bold text-accent">100%</div>
-              <div className="text-sm text-muted-foreground">Free to Use</div>
+              <div className="font-display text-3xl md:text-4xl font-bold text-accent">{t("heroStat3Value")}</div>
+              <div className="text-sm text-muted-foreground">{t("heroStat3Title")}</div>
             </div>
           </div>
         </div>

@@ -2,6 +2,7 @@ import { Sprout, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { LanguageSelector } from "./LanguageSelector";
+import { getTranslation, LanguageCode } from "@/lib/translations";
 
 interface HeaderProps {
   selectedLanguage: string;
@@ -9,6 +10,7 @@ interface HeaderProps {
 }
 
 export function Header({ selectedLanguage, onLanguageChange }: HeaderProps) {
+  const t = (key: string) => getTranslation(selectedLanguage as LanguageCode, key as any);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
@@ -25,7 +27,7 @@ export function Header({ selectedLanguage, onLanguageChange }: HeaderProps) {
                 AgriAdvisor
               </span>
               <span className="text-xs text-muted-foreground hidden sm:block">
-                Multilingual Farm Advisory
+                {t("headerSubtitle")}
               </span>
             </div>
           </a>
@@ -33,13 +35,13 @@ export function Header({ selectedLanguage, onLanguageChange }: HeaderProps) {
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-8">
             <a href="#features" className="text-muted-foreground hover:text-foreground transition-colors">
-              Features
+              {t("headerFeatures")}
             </a>
             <a href="#how-it-works" className="text-muted-foreground hover:text-foreground transition-colors">
-              How It Works
+              {t("headerHowItWorks")}
             </a>
             <a href="#languages" className="text-muted-foreground hover:text-foreground transition-colors">
-              Languages
+              {t("headerLanguages")}
             </a>
           </nav>
 
@@ -51,7 +53,7 @@ export function Header({ selectedLanguage, onLanguageChange }: HeaderProps) {
               variant="glass"
             />
             <Button variant="hero" size="lg" className="hidden sm:flex">
-              Get Started
+              {t("headerGetStarted")}
             </Button>
             
             {/* Mobile menu button */}
@@ -75,24 +77,24 @@ export function Header({ selectedLanguage, onLanguageChange }: HeaderProps) {
                 className="text-muted-foreground hover:text-foreground transition-colors py-2"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                Features
+                {t("headerFeatures")}
               </a>
               <a 
                 href="#how-it-works" 
                 className="text-muted-foreground hover:text-foreground transition-colors py-2"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                How It Works
+                {t("headerHowItWorks")}
               </a>
               <a 
                 href="#languages" 
                 className="text-muted-foreground hover:text-foreground transition-colors py-2"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                Languages
+                {t("headerLanguages")}
               </a>
               <Button variant="hero" className="mt-2">
-                Get Started
+                {t("headerGetStarted")}
               </Button>
             </nav>
           </div>
