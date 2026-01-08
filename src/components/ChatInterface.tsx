@@ -35,9 +35,12 @@ export function ChatInterface({ selectedLanguage, onLanguageChange }: ChatInterf
   const [isRecording, setIsRecording] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+    }
   };
 
   useEffect(() => {
@@ -147,7 +150,7 @@ export function ChatInterface({ selectedLanguage, onLanguageChange }: ChatInterf
             </div>
 
             {/* Messages */}
-            <div className="h-[400px] overflow-y-auto p-6 space-y-4">
+            <div className="h-[400px] overflow-y-auto p-6 space-y-4" ref={messagesContainerRef}>
               {messages.map((message) => (
                 <div
                   key={message.id}
