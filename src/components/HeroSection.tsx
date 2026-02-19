@@ -7,10 +7,14 @@ interface HeroSectionProps {
 }
 
 export function HeroSection({ onStartChat }: HeroSectionProps) {
+  const handleExploreLanguages = () => {
+    document.getElementById("languages")?.scrollIntoView({ behavior: "smooth" });
+  };
+
   return (
     <section className="relative min-h-screen flex items-center pt-20 overflow-hidden">
       {/* Background Image with Overlay */}
-      <div className="absolute inset-0 z-0">
+      <div className="absolute inset-0 z-0 pointer-events-none">
         <img 
           src={heroImage} 
           alt="Nigerian farmland at sunrise" 
@@ -21,7 +25,7 @@ export function HeroSection({ onStartChat }: HeroSectionProps) {
       </div>
 
       {/* Pattern Overlay */}
-      <div className="absolute inset-0 pattern-dots opacity-30 z-[1]" />
+      <div className="absolute inset-0 pattern-dots opacity-30 z-[1] pointer-events-none" />
 
       <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-3xl">
@@ -52,32 +56,16 @@ export function HeroSection({ onStartChat }: HeroSectionProps) {
               Start Asking Questions
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Button>
-            <Button variant="outline" size="xl">
+            <Button variant="outline" size="xl" onClick={handleExploreLanguages}>
               <Globe2 className="w-5 h-5" />
               Explore Languages
             </Button>
-          </div>
-
-          {/* Stats */}
-          <div className="grid grid-cols-3 gap-6 md:gap-8 animate-fade-in" style={{ animationDelay: "0.3s" }}>
-            <div className="text-center sm:text-left">
-              <div className="font-display text-3xl md:text-4xl font-bold text-primary">4+</div>
-              <div className="text-sm text-muted-foreground">Languages Supported</div>
-            </div>
-            <div className="text-center sm:text-left">
-              <div className="font-display text-3xl md:text-4xl font-bold text-secondary">24/7</div>
-              <div className="text-sm text-muted-foreground">Always Available</div>
-            </div>
-            <div className="text-center sm:text-left">
-              <div className="font-display text-3xl md:text-4xl font-bold text-accent">100%</div>
-              <div className="text-sm text-muted-foreground">Free to Use</div>
-            </div>
           </div>
         </div>
       </div>
 
       {/* Decorative Elements */}
-      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent z-10" />
+      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent z-10 pointer-events-none" />
     </section>
   );
 }
