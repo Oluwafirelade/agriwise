@@ -47,19 +47,19 @@ export function Header({ selectedLanguage, onLanguageChange }: HeaderProps) {
 
           {/* Actions */}
           <div className="flex items-center gap-3">
-            <LanguageSelector 
+            <LanguageSelector
               selectedLanguage={selectedLanguage}
               onLanguageChange={onLanguageChange}
               variant="glass"
             />
-            <Button variant="hero" size="lg" className="hidden sm:flex">
-              {t("headerGetStarted")}
+            <Button variant="hero" size="lg" className="hidden sm:flex" asChild>
+              <a href="/">{t("headerGetStarted")}</a>
             </Button>
-            
+
             {/* Mobile menu button */}
-            <Button 
-              variant="ghost" 
-              size="icon" 
+            <Button
+              variant="ghost"
+              size="icon"
               className="md:hidden"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
@@ -68,37 +68,41 @@ export function Header({ selectedLanguage, onLanguageChange }: HeaderProps) {
           </div>
         </div>
 
-        {/* Mobile Menu */}
-        {mobileMenuOpen && (
-          <div className="md:hidden py-4 border-t border-border/50 animate-slide-up">
-            <nav className="flex flex-col gap-4">
-              <a 
-                href="#features" 
-                className="text-muted-foreground hover:text-foreground transition-colors py-2"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                {t("headerFeatures")}
-              </a>
-              <a 
-                href="#how-it-works" 
-                className="text-muted-foreground hover:text-foreground transition-colors py-2"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                {t("headerHowItWorks")}
-              </a>
-              <a 
-                href="#languages" 
-                className="text-muted-foreground hover:text-foreground transition-colors py-2"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                {t("headerLanguages")}
-              </a>
-              <Button variant="hero" className="mt-2">
-                {t("headerGetStarted")}
-              </Button>
-            </nav>
-          </div>
-        )}
+       {/* Mobile Menu */}
+{mobileMenuOpen && (
+  <div className="md:hidden py-4 border-t border-border/50 animate-slide-up">
+    <nav className="flex flex-col gap-4">
+      <a
+        href="#features"
+        className="text-muted-foreground hover:text-foreground transition-colors py-2"
+        onClick={() => setMobileMenuOpen(false)}
+      >
+        {t("headerFeatures")}
+      </a>
+      <a
+        href="#how-it-works"
+        className="text-muted-foreground hover:text-foreground transition-colors py-2"
+        onClick={() => setMobileMenuOpen(false)}
+      >
+        {t("headerHowItWorks")}
+      </a>
+      <a
+        href="#languages"
+        className="text-muted-foreground hover:text-foreground transition-colors py-2"
+        onClick={() => setMobileMenuOpen(false)}
+      >
+        {t("headerLanguages")}
+      </a>
+
+      <Button variant="hero" className="mt-2" asChild>
+        <a href="/" onClick={() => setMobileMenuOpen(false)}>
+          {t("headerGetStarted")}
+        </a>
+      </Button>
+    </nav>
+  </div>
+)}
+
       </div>
     </header>
   );
