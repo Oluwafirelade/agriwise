@@ -81,9 +81,9 @@ export function LanguagesSection({ selectedLanguage = "en" }: LanguagesSectionPr
                     <h3 className="font-display text-xl font-bold text-foreground">
                       {lang.nativeName}
                     </h3>
-                    {lang.nativeName !== lang.name && (
+                    
                       <p className="text-sm text-muted-foreground">{lang.name}</p>
-                    )}
+                    
                   </div>
                 </div>
 

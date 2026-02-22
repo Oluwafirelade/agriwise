@@ -30,7 +30,7 @@ export function HeroSection({ onStartChat }: HeroSectionProps) {
       <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-3xl">
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-full px-4 py-2 mb-6 animate-fade-in">
+          <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-full px-4 py-2 mb-6 mt-3 animate-fade-in">
             <Leaf className="w-4 h-4 text-primary" />
             <span className="text-sm font-medium text-primary">AI-Powered Agricultural Guidance</span>
           </div>
@@ -45,7 +45,7 @@ export function HeroSection({ onStartChat }: HeroSectionProps) {
           {/* Subheadline */}
           <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl animate-slide-up" style={{ animationDelay: "0.1s" }}>
             Get personalized farming advice in your native language. Our intelligent platform 
-            understands Hausa, Yoruba, Igbo, and English — helping Nigerian farmers make 
+            understands Hausa, Yoruba, Igbo, and English ,helping Nigerian farmers make 
             better decisions for healthier crops and higher yields.
           </p>
 
@@ -65,7 +65,7 @@ export function HeroSection({ onStartChat }: HeroSectionProps) {
       </div>
 
       {/* Decorative Elements */}
-      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent z-10 pointer-events-none" />
+     <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent z-0 pointer-events-none" />
     </section>
   );
 }

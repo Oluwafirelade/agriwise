@@ -44,7 +44,7 @@ export const translations = {
     // How It Works Section
     howItWorksLabel: "Simple Process",
     howItWorksHeading: "How AgriAdvisor Works",
-    howItWorksSubheading: "From your question to expert advice — all in seconds, in your own language.",
+    howItWorksSubheading: "From your question to expert advice all in seconds, in your own language.",
     howStep1Title: "Ask Your Question",
     howStep1Desc: "Type or speak your farming question in any supported language. Describe what you're seeing on your farm.",
     howStep1Example: '"My plantain leaves are turning brown and curling"',

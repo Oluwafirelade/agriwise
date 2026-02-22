@@ -66,9 +66,9 @@ export function LanguageSelector({
               <span className="text-lg">{lang.flag}</span>
               <span className="flex flex-col">
                 <span className="font-medium">{lang.nativeName}</span>
-                {lang.nativeName !== lang.name && (
+                
                   <span className="text-xs text-muted-foreground">{lang.name}</span>
-                )}
+                
               </span>
             </span>
             {selectedLanguage === lang.code && (
