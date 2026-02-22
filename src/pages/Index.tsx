@@ -20,22 +20,23 @@ const Index = () => {
       <Header 
         selectedLanguage={selectedLanguage}
         onLanguageChange={setSelectedLanguage}
+        onStartChat={scrollToChat}
       />
       
       <main>
-        <HeroSection onStartChat={scrollToChat} />
-        <FeaturesSection />
-        <HowItWorksSection />
+        <HeroSection onStartChat={scrollToChat}  />
+        <FeaturesSection selectedLanguage={selectedLanguage} />
+        <HowItWorksSection selectedLanguage={selectedLanguage} />
         <div ref={chatRef}>
           <ChatInterface 
             selectedLanguage={selectedLanguage}
             onLanguageChange={setSelectedLanguage}
           />
         </div>
-        <LanguagesSection />
+        <LanguagesSection selectedLanguage={selectedLanguage} />
       </main>
 
-      <Footer />
+      <Footer  />
     </div>
   );
 };

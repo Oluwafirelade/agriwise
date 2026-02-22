@@ -1,51 +1,57 @@
 import { Globe, MessageSquareText, Zap, Brain, Mic, Shield } from "lucide-react";
+import { getTranslation, LanguageCode } from "@/lib/translations";
 
-const features = [
-  {
-    icon: Globe,
-    title: "Multilingual Support",
-    description: "Ask questions in Hausa, Yoruba, Igbo, or English. Our NLP system understands and responds in your preferred language.",
-    color: "text-primary",
-    bgColor: "bg-primary/10",
-  },
-  {
-    icon: MessageSquareText,
-    title: "Natural Conversations",
-    description: "Describe your farming problems naturally. No technical jargon needed — just explain what you see on your farm.",
-    color: "text-secondary",
-    bgColor: "bg-secondary/10",
-  },
-  {
-    icon: Zap,
-    title: "Instant Responses",
-    description: "Get real-time advice on pest control, crop diseases, planting schedules, and soil management.",
-    color: "text-accent",
-    bgColor: "bg-accent/10",
-  },
-  {
-    icon: Brain,
-    title: "AI-Powered Insights",
-    description: "Leveraging advanced NLP models trained on agricultural knowledge specific to Nigerian farming conditions.",
-    color: "text-primary",
-    bgColor: "bg-primary/10",
-  },
-  {
-    icon: Mic,
-    title: "Voice Input Support",
-    description: "Speak your questions if you prefer. Perfect for farmers who find typing challenging.",
-    color: "text-secondary",
-    bgColor: "bg-secondary/10",
-  },
-  {
-    icon: Shield,
-    title: "Trusted Guidance",
-    description: "Advice based on proven agricultural practices and local farming expertise from extension services.",
-    color: "text-accent",
-    bgColor: "bg-accent/10",
-  },
-];
+interface FeaturesSectionProps {
+  selectedLanguage?: string;
+}
 
-export function FeaturesSection() {
+export function FeaturesSection({ selectedLanguage = "en" }: FeaturesSectionProps) {
+  const t = (key: string) => getTranslation(selectedLanguage as LanguageCode, key as any);
+
+  const features = [
+    {
+      icon: Globe,
+      titleKey: "feature1Title",
+      descKey: "feature1Desc",
+      color: "text-primary",
+      bgColor: "bg-primary/10",
+    },
+    {
+      icon: MessageSquareText,
+      titleKey: "feature2Title",
+      descKey: "feature2Desc",
+      color: "text-secondary",
+      bgColor: "bg-secondary/10",
+    },
+    {
+      icon: Zap,
+      titleKey: "feature3Title",
+      descKey: "feature3Desc",
+      color: "text-accent",
+      bgColor: "bg-accent/10",
+    },
+    {
+      icon: Brain,
+      titleKey: "feature4Title",
+      descKey: "feature4Desc",
+      color: "text-primary",
+      bgColor: "bg-primary/10",
+    },
+    {
+      icon: Mic,
+      titleKey: "feature5Title",
+      descKey: "feature5Desc",
+      color: "text-secondary",
+      bgColor: "bg-secondary/10",
+    },
+    {
+      icon: Shield,
+      titleKey: "feature6Title",
+      descKey: "feature6Desc",
+      color: "text-accent",
+      bgColor: "bg-accent/10",
+    },
+  ];
   return (
     <section id="features" className="py-20 md:py-32 bg-gradient-subtle relative">
       <div className="absolute inset-0 pattern-lines" />
@@ -54,15 +60,14 @@ export function FeaturesSection() {
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
           <span className="inline-block text-sm font-semibold text-secondary uppercase tracking-wider mb-4">
-            Platform Features
+            {t("featuresSectionLabel")}
           </span>
           <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-6">
-            Everything You Need for{" "}
-            <span className="text-primary">Smarter Farming</span>
+            {t("featuresHeading")}{" "}
+            <span className="text-primary">{t("featuresHeadingHighlight")}</span>
           </h2>
           <p className="text-lg text-muted-foreground">
-            Our platform combines advanced language processing with agricultural expertise 
-            to deliver personalized guidance right when you need it.
+            {t("featuresSubheading")}
           </p>
         </div>
 
@@ -70,7 +75,7 @@ export function FeaturesSection() {
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
           {features.map((feature, index) => (
             <div
-              key={feature.title}
+              key={feature.titleKey}
               className="group bg-card rounded-2xl p-6 md:p-8 shadow-soft hover:shadow-elevated transition-all duration-300 hover:-translate-y-1 border border-border/50"
               style={{ animationDelay: `${index * 0.1}s` }}
             >
@@ -78,10 +83,10 @@ export function FeaturesSection() {
                 <feature.icon className={`w-7 h-7 ${feature.color}`} />
               </div>
               <h3 className="font-display text-xl font-bold text-foreground mb-3">
-                {feature.title}
+                {t(feature.titleKey)}
               </h3>
               <p className="text-muted-foreground leading-relaxed">
-                {feature.description}
+                {t(feature.descKey)}
               </p>
             </div>
           ))}

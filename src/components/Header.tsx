@@ -7,9 +7,10 @@ import { ThemeToggle } from "./ThemeToggle";
 interface HeaderProps {
   selectedLanguage: string;
   onLanguageChange: (code: string) => void;
+  onStartChat: () => void;
 }
 
-export function Header({ selectedLanguage, onLanguageChange }: HeaderProps) {
+export function Header({ selectedLanguage, onLanguageChange, onStartChat }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
@@ -46,13 +47,12 @@ export function Header({ selectedLanguage, onLanguageChange }: HeaderProps) {
 
           {/* Actions */}
           <div className="flex items-center gap-2 md:gap-3">
-            <ThemeToggle />
             <LanguageSelector 
               selectedLanguage={selectedLanguage}
               onLanguageChange={onLanguageChange}
               variant="glass"
             />
-            <Button variant="hero" size="lg" className="hidden sm:flex">
+            <Button variant="hero" size="lg" className="hidden sm:flex" onClick={onStartChat}>
               Get Started
             </Button>
             
@@ -93,7 +93,7 @@ export function Header({ selectedLanguage, onLanguageChange }: HeaderProps) {
               >
                 Languages
               </a>
-              <Button variant="hero" className="mt-2">
+              <Button variant="hero" className="mt-2" onClick={onStartChat}>
                 Get Started
               </Button>
             </nav>

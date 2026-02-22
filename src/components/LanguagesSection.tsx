@@ -1,59 +1,65 @@
 import { Check, Users } from "lucide-react";
+import { getTranslation, LanguageCode } from "@/lib/translations";
 
-const languageDetails = [
-  {
-    code: "en",
-    name: "English",
-    nativeName: "English",
-    flag: "🇬🇧",
-    speakers: "~20 Million",
-    regions: "Nationwide",
-    features: ["Full text support", "Voice input/output", "Comprehensive vocabulary"],
-  },
-  {
-    code: "ha",
-    name: "Hausa", 
-    nativeName: "Hausa",
-    flag: "🇳🇬",
-    speakers: "~70 Million",
-    regions: "Northern Nigeria",
-    features: ["Native text processing", "Agricultural terminology", "Dialect variations"],
-  },
-  {
-    code: "yo",
-    name: "Yoruba",
-    nativeName: "Yorùbá",
-    flag: "🇳🇬",
-    speakers: "~45 Million",
-    regions: "Southwestern Nigeria",
-    features: ["Tonal language support", "Diacritical marks", "Local farming terms"],
-  },
-  {
-    code: "ig",
-    name: "Igbo",
-    nativeName: "Igbo",
-    flag: "🇳🇬",
-    speakers: "~45 Million",
-    regions: "Southeastern Nigeria",
-    features: ["Complex orthography", "Regional dialects", "Traditional practices"],
-  },
-];
+interface LanguagesSectionProps {
+  selectedLanguage?: string;
+}
 
-export function LanguagesSection() {
+export function LanguagesSection({ selectedLanguage = "en" }: LanguagesSectionProps) {
+  const t = (key: string) => getTranslation(selectedLanguage as LanguageCode, key as any);
+
+  const languageDetails = [
+    {
+      code: "en",
+      name: "English",
+      nativeName: "English",
+      flag: "🇬🇧",
+      speakers: "~20 Million",
+      regions: "Nationwide",
+      features: ["Full text support", "Voice input/output", "Comprehensive vocabulary"],
+    },
+    {
+      code: "ha",
+      name: "Hausa", 
+      nativeName: "Hausa",
+      flag: "🇳🇬",
+      speakers: "~70 Million",
+      regions: "Northern Nigeria",
+      features: ["Native text processing", "Agricultural terminology", "Dialect variations"],
+    },
+    {
+      code: "yo",
+      name: "Yoruba",
+      nativeName: "Yorùbá",
+      flag: "🇳🇬",
+      speakers: "~45 Million",
+      regions: "Southwestern Nigeria",
+      features: ["Tonal language support", "Diacritical marks", "Local farming terms"],
+    },
+    {
+      code: "ig",
+      name: "Igbo",
+      nativeName: "Igbo",
+      flag: "🇳🇬",
+      speakers: "~45 Million",
+      regions: "Southeastern Nigeria",
+      features: ["Complex orthography", "Regional dialects", "Traditional practices"],
+    },
+  ];
+
   return (
     <section id="languages" className="py-20 md:py-32 bg-background">
       <div className="container mx-auto px-4">
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
           <span className="inline-block text-sm font-semibold text-secondary uppercase tracking-wider mb-4">
-            Language Support
+            {t("languagesLabel")}
           </span>
           <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-6">
-            Speak Your <span className="text-primary">Native Language</span>
+            {t("languagesHeading")} <span className="text-primary">{t("languagesHeadingHighlight")}</span>
           </h2>
           <p className="text-lg text-muted-foreground">
-            Breaking language barriers for Nigerian farmers. Our platform understands 
-            the major Nigerian languages, making agricultural knowledge accessible to all.
+            {t("languagesSubheading")}
           </p>
         </div>
 
