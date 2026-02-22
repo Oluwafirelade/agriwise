@@ -2,15 +2,14 @@ import { Sprout, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { LanguageSelector } from "./LanguageSelector";
-import { getTranslation, LanguageCode } from "@/lib/translations";
 
 interface HeaderProps {
   selectedLanguage: string;
   onLanguageChange: (code: string) => void;
+  onStartChat: () => void;
 }
 
-export function Header({ selectedLanguage, onLanguageChange }: HeaderProps) {
-  const t = (key: string) => getTranslation(selectedLanguage as LanguageCode, key as any);
+export function Header({ selectedLanguage, onLanguageChange, onStartChat }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
@@ -27,7 +26,7 @@ export function Header({ selectedLanguage, onLanguageChange }: HeaderProps) {
                 AgriAdvisor
               </span>
               <span className="text-xs text-muted-foreground hidden sm:block">
-                {t("headerSubtitle")}
+                Multilingual Farm Advisory
               </span>
             </div>
           </a>
@@ -35,31 +34,31 @@ export function Header({ selectedLanguage, onLanguageChange }: HeaderProps) {
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-8">
             <a href="#features" className="text-muted-foreground hover:text-foreground transition-colors">
-              {t("headerFeatures")}
+              Features
             </a>
             <a href="#how-it-works" className="text-muted-foreground hover:text-foreground transition-colors">
-              {t("headerHowItWorks")}
+              How It Works
             </a>
             <a href="#languages" className="text-muted-foreground hover:text-foreground transition-colors">
-              {t("headerLanguages")}
+              Languages
             </a>
           </nav>
 
           {/* Actions */}
-          <div className="flex items-center gap-3">
-            <LanguageSelector
+          <div className="flex items-center gap-2 md:gap-3">
+            <LanguageSelector 
               selectedLanguage={selectedLanguage}
               onLanguageChange={onLanguageChange}
               variant="glass"
             />
-            <Button variant="hero" size="lg" className="hidden sm:flex" asChild>
-              <a href="/">{t("headerGetStarted")}</a>
+            <Button variant="hero" size="lg" className="hidden sm:flex" onClick={onStartChat}>
+              Get Started
             </Button>
-
+            
             {/* Mobile menu button */}
-            <Button
-              variant="ghost"
-              size="icon"
+            <Button 
+              variant="ghost" 
+              size="icon" 
               className="md:hidden"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
@@ -68,41 +67,37 @@ export function Header({ selectedLanguage, onLanguageChange }: HeaderProps) {
           </div>
         </div>
 
-       {/* Mobile Menu */}
-{mobileMenuOpen && (
-  <div className="md:hidden py-4 border-t border-border/50 animate-slide-up">
-    <nav className="flex flex-col gap-4">
-      <a
-        href="#features"
-        className="text-muted-foreground hover:text-foreground transition-colors py-2"
-        onClick={() => setMobileMenuOpen(false)}
-      >
-        {t("headerFeatures")}
-      </a>
-      <a
-        href="#how-it-works"
-        className="text-muted-foreground hover:text-foreground transition-colors py-2"
-        onClick={() => setMobileMenuOpen(false)}
-      >
-        {t("headerHowItWorks")}
-      </a>
-      <a
-        href="#languages"
-        className="text-muted-foreground hover:text-foreground transition-colors py-2"
-        onClick={() => setMobileMenuOpen(false)}
-      >
-        {t("headerLanguages")}
-      </a>
-
-      <Button variant="hero" className="mt-2" asChild>
-        <a href="/" onClick={() => setMobileMenuOpen(false)}>
-          {t("headerGetStarted")}
-        </a>
-      </Button>
-    </nav>
-  </div>
-)}
-
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden py-4 border-t border-border/50 animate-slide-up">
+            <nav className="flex flex-col gap-4">
+              <a 
+                href="#features" 
+                className="text-muted-foreground hover:text-foreground transition-colors py-2"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Features
+              </a>
+              <a 
+                href="#how-it-works" 
+                className="text-muted-foreground hover:text-foreground transition-colors py-2"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                How It Works
+              </a>
+              <a 
+                href="#languages" 
+                className="text-muted-foreground hover:text-foreground transition-colors py-2"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Languages
+              </a>
+              <Button variant="hero" className="mt-2" onClick={onStartChat}>
+                Get Started
+              </Button>
+            </nav>
+          </div>
+        )}
       </div>
     </header>
   );

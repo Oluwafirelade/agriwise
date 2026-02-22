@@ -20,10 +20,11 @@ const Index = () => {
       <Header 
         selectedLanguage={selectedLanguage}
         onLanguageChange={setSelectedLanguage}
+        onStartChat={scrollToChat}
       />
       
       <main>
-        <HeroSection onStartChat={scrollToChat} selectedLanguage={selectedLanguage} />
+        <HeroSection onStartChat={scrollToChat}  />
         <FeaturesSection selectedLanguage={selectedLanguage} />
         <HowItWorksSection selectedLanguage={selectedLanguage} />
         <div ref={chatRef}>
@@ -35,7 +36,7 @@ const Index = () => {
         <LanguagesSection selectedLanguage={selectedLanguage} />
       </main>
 
-      <Footer selectedLanguage={selectedLanguage} />
+      <Footer  />
     </div>
   );
 };
