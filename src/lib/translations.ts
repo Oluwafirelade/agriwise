@@ -89,10 +89,10 @@ export const translations = {
     // Chat UI
     chatWelcome: "What can I help you with?",
     chatPlaceholderAsk: "Ask about farming...",
-    chatPlaceholderFollowUp: "Follow-up question...",
+    chatPlaceholderFollowUp: "Ask about farming...",
     chatThinking: "Thinking...",
     chatNewChat: "New chat",
-    chatRecent: "Recent",
+    chatRecent: "Your Chats",
   },
   ha: {
     // Header

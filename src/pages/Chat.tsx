@@ -239,9 +239,9 @@ const Chat = () => {
         />
       )}
 
-      {/* Sidebar Area */}
+    {/* Sidebar Area */}
       <aside 
-        className={`fixed lg:static inset-y-0 left-0 z-50 w-72 flex-shrink-0 bg-muted/30 border-r border-border flex flex-col transition-all duration-300 ease-in-out ${
+        className={`fixed lg:static inset-y-0 left-0 z-50 w-72 flex-shrink-0 bg-background border-r border-border flex flex-col transition-all duration-300 ease-in-out ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0 lg:-ml-72"
         }`}
       >
@@ -298,7 +298,7 @@ const Chat = () => {
           )}
         </div>
 
-        <div className="p-4 border-t border-border/50 bg-background/50">
+        <div className="p-4 border-t border-border/50 bg-background">
           <LanguageSelector 
             selectedLanguage={selectedLanguage} 
             onLanguageChange={(lang) => setSelectedLanguage(lang as LanguageCode)} 
