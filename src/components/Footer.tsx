@@ -1,6 +1,20 @@
 import { Sprout, Mail, Phone, MapPin } from "lucide-react";
 
 export function Footer() {
+  // Helper function for smooth scrolling
+  const scrollToSection = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
+    e.preventDefault();
+    const element = document.getElementById(id);
+    if (element) {
+      // If the section exists on the current page, scroll to it smoothly
+      element.scrollIntoView({ behavior: "smooth" });
+    } else {
+      // If the section isn't on this page (e.g., user is on the /chat page), 
+      // navigate them to the home page's section
+      window.location.href = `/#${id}`;
+    }
+  };
+
   return (
     <footer className="bg-sidebar text-sidebar-foreground">
       <div className="container mx-auto px-4 py-16">
@@ -31,22 +45,38 @@ export function Footer() {
             <h4 className="font-display font-bold text-lg mb-6">Quick Links</h4>
             <ul className="space-y-3">
               <li>
-                <a href="#features" className="text-sm text-sidebar-foreground/70 hover:text-sidebar-primary transition-colors">
+                <a 
+                  href="#features" 
+                  onClick={(e) => scrollToSection(e, "features")}
+                  className="text-sm text-sidebar-foreground/70 hover:text-sidebar-primary transition-colors cursor-pointer"
+                >
                   Features
                 </a>
               </li>
               <li>
-                <a href="#how-it-works" className="text-sm text-sidebar-foreground/70 hover:text-sidebar-primary transition-colors">
+                <a 
+                  href="#how-it-works" 
+                  onClick={(e) => scrollToSection(e, "how-it-works")}
+                  className="text-sm text-sidebar-foreground/70 hover:text-sidebar-primary transition-colors cursor-pointer"
+                >
                   How It Works
                 </a>
               </li>
               <li>
-                <a href="#languages" className="text-sm text-sidebar-foreground/70 hover:text-sidebar-primary transition-colors">
+                <a 
+                  href="#languages" 
+                  onClick={(e) => scrollToSection(e, "languages")}
+                  className="text-sm text-sidebar-foreground/70 hover:text-sidebar-primary transition-colors cursor-pointer"
+                >
                   Languages
                 </a>
               </li>
               <li>
-                <a href="#chat" className="text-sm text-sidebar-foreground/70 hover:text-sidebar-primary transition-colors">
+                <a 
+                  href="#chat" 
+                  onClick={(e) => scrollToSection(e, "chat")}
+                  className="text-sm text-sidebar-foreground/70 hover:text-sidebar-primary transition-colors cursor-pointer"
+                >
                   Try It Now
                 </a>
               </li>

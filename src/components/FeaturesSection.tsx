@@ -62,7 +62,8 @@ export function FeaturesSection({ selectedLanguage = "en" }: FeaturesSectionProp
           <span className="inline-block text-sm font-semibold text-secondary uppercase tracking-wider mb-4">
             {t("featuresSectionLabel")}
           </span>
-          <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-6">
+          {/* UPDATED: Changed text-foreground to text-gray-900 dark:text-gray-900 */}
+          <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-gray-900 mb-6">
             {t("featuresHeading")}{" "}
             <span className="text-primary">{t("featuresHeadingHighlight")}</span>
           </h2>
