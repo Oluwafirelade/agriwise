@@ -254,9 +254,9 @@ export function ChatInterface({ selectedLanguage, onLanguageChange }: ChatInterf
           <span className="inline-block text-sm font-semibold text-secondary uppercase tracking-wider mb-4">
             Try It Now
           </span>
-          <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-6">
-            Ask Your <span className="text-primary">Farming Questions</span>
-          </h2>
+         <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-gray-900 mb-6">
+  Ask Your <span className="text-primary">Farming Questions</span>
+</h2>
           <p className="text-lg text-muted-foreground">
             Experience the power of multilingual agricultural advice. Select your language and start asking!
           </p>

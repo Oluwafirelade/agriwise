@@ -31,7 +31,7 @@ export const translations = {
     feature1Title: "Multilingual Support",
     feature1Desc: "Ask questions in Hausa, Yoruba, Igbo, or English. Our NLP system understands and responds in your preferred language.",
     feature2Title: "Natural Conversations",
-    feature2Desc: "Describe your farming problems naturally. No technical jargon needed — just explain what you see on your farm.",
+    feature2Desc: "Describe your farming problems naturally. No technical jargon needed just explain what you see on your farm.",
     feature3Title: "Instant Responses",
     feature3Desc: "Get real-time advice on pest control, crop diseases, planting schedules, and soil management.",
     feature4Title: "AI-Powered Insights",
@@ -85,6 +85,14 @@ export const translations = {
     footerCopyright: "© 2024 AgriAdvisor. All rights reserved.",
     footerPrivacy: "Privacy Policy",
     footerTerms: "Terms of Service",
+
+    // Chat UI
+    chatWelcome: "What can I help you with?",
+    chatPlaceholderAsk: "Ask about farming...",
+    chatPlaceholderFollowUp: "Follow-up question...",
+    chatThinking: "Thinking...",
+    chatNewChat: "New chat",
+    chatRecent: "Recent",
   },
   ha: {
     // Header
@@ -172,6 +180,14 @@ export const translations = {
     footerCopyright: "© 2024 AgriAdvisor. Duk haƙƙi na karɓa.",
     footerPrivacy: "Latar Keɓewa",
     footerTerms: "Sharatai na Aiki",
+
+    // Chat UI
+    chatWelcome: "Me zan iya taimaka muku da shi?",
+    chatPlaceholderAsk: "Tambaya game da noma...",
+    chatPlaceholderFollowUp: "Tambayar biyo baya...",
+    chatThinking: "Tunanin...",
+    chatNewChat: "Sabuwar tattaunawa",
+    chatRecent: "Kwanan nan",
   },
   yo: {
     // Header
@@ -259,6 +275,14 @@ export const translations = {
     footerCopyright: "© 2024 AgriAdvisor. Gbogbo etò ni a pa.",
     footerPrivacy: "Ileto Idaniloju",
     footerTerms: "Awọn Ọrọ Isedale",
+
+    // Chat UI
+    chatWelcome: "Kini mo le ṣe iranlọwọ fun ọ pẹlu?",
+    chatPlaceholderAsk: "Beere nipa ogbin...",
+    chatPlaceholderFollowUp: "Ibeere atẹle...",
+    chatThinking: "Nro...",
+    chatNewChat: "Iwiregbe tuntun",
+    chatRecent: "Laipe",
   },
   ig: {
     // Header
@@ -346,6 +370,14 @@ export const translations = {
     footerCopyright: "© 2024 AgriAdvisor. Nkwere ihe nile.",
     footerPrivacy: "Nchikota Nzuzo",
     footerTerms: "Usoro Iji",
+
+    // Chat UI
+    chatWelcome: "Kedu ihe m nwere ike inyere gị aka?",
+    chatPlaceholderAsk: "Jụọ gbasara ọrụ ugbo...",
+    chatPlaceholderFollowUp: "Ajụjụ na-esote...",
+    chatThinking: "Na-eche echiche...",
+    chatNewChat: "Nkata ọhụrụ",
+    chatRecent: "Nso nso a",
   },
 };
 
