@@ -89,10 +89,16 @@ export function Footer() {
             <ul className="space-y-4">
               <li className="flex items-start gap-3">
                 <MapPin className="w-5 h-5 text-sidebar-primary flex-shrink-0 mt-0.5" />
-                <span className="text-sm text-sidebar-foreground/70">
+                {/* Updated this section to link to Google Maps */}
+                <a 
+                  href="https://www.google.com/maps/search/?api=1&query=Babcock+University,+Ilishan-Remo,+Nigeria"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-sidebar-foreground/70 hover:text-sidebar-primary transition-colors cursor-pointer"
+                >
                   Babcock University,<br />
                   Ilishan-Remo, Nigeria
-                </span>
+                </a>
               </li>
               <li className="flex items-center gap-3">
                 <Mail className="w-5 h-5 text-sidebar-primary" />
