@@ -6,10 +6,11 @@ import {
 } from "lucide-react"; 
 import { Button } from "@/components/ui/button";
 import { LanguageSelector } from "@/components/LanguageSelector";
-import { getAgriculturalAdvice } from "@/lib/huggingface"; 
+import { ThemeToggle } from "@/components/ThemeToggle"; // <-- ADDED IMPORT
 
 // IMPORTANT: Adjust this path to wherever your translations.ts file lives!
 import { getTranslation, LanguageCode } from "@/lib/translations"; 
+import { getAgriculturalAdvice } from "@/lib/huggingface"; 
 
 interface Message {
   id: string;
@@ -24,7 +25,6 @@ interface ChatHistory {
   date: string;
 }
 
-// Kept suggestion cards here since they map React Icons to specific multi-language strings
 const suggestionCards = [
   { 
     icon: Leaf, 
@@ -65,7 +65,6 @@ const Chat = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   
-  // Notice the state is now explicitly typed as LanguageCode
   const [selectedLanguage, setSelectedLanguage] = useState<LanguageCode>("en");
   
   const [sidebarOpen, setSidebarOpen] = useState(
@@ -238,12 +237,16 @@ const Chat = () => {
             )}
           </div>
           
-          <button 
-            onClick={handleGoHome} 
-            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors px-3 py-1.5 rounded-full hover:bg-muted"
-          >
-            <ArrowLeft className="w-4 h-4" /> Home
-          </button>
+          {/* <-- ADDED ThemeToggle and wrapped it with Home button in a flex row --> */}
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <button 
+              onClick={handleGoHome} 
+              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors px-3 py-1.5 rounded-full hover:bg-muted"
+            >
+              <ArrowLeft className="w-4 h-4" /> Home
+            </button>
+          </div>
         </header>
 
         <div className="flex-1 overflow-y-auto">
