@@ -1,12 +1,38 @@
-import { ArrowRight, MessageCircle, Globe2, Leaf } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ArrowRight, MessageCircle, Globe2, Leaf, Quote } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import heroImage from "@/assets/hero-farm.jpg";
+
+// Array of farming-related Bible verses
+const farmingVerses = [
+  { text: "Those who work their land will have abundant food.", ref: "Proverbs 28:19" },
+  { text: "The hardworking farmer should be the first to receive a share of the crops.", ref: "2 Timothy 2:6" },
+  { text: "Sow your seed in the morning, and at evening let your hands not be idle.", ref: "Ecclesiastes 11:6" },
+  { text: "For the seed shall be prosperous; the vine shall give her fruit, and the ground shall give her increase.", ref: "Zechariah 8:12" },
+  { text: "And let us not grow weary of doing good, for in due season we will reap, if we do not give up.", ref: "Galatians 6:9" }
+];
 
 interface HeroSectionProps {
   onStartChat: () => void;
 }
 
 export function HeroSection({ onStartChat }: HeroSectionProps) {
+  const [verseIndex, setVerseIndex] = useState(0);
+
+  // Rotate verse every 8 seconds. 
+  // Adding verseIndex to the dependency array ensures the timer resets if the user clicks manually.
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setVerseIndex((prevIndex) => (prevIndex + 1) % farmingVerses.length);
+    }, 8000);
+    
+    return () => clearInterval(interval);
+  }, [verseIndex]);
+
+  const handleNextVerse = () => {
+    setVerseIndex((prevIndex) => (prevIndex + 1) % farmingVerses.length);
+  };
+
   const handleExploreLanguages = () => {
     document.getElementById("languages")?.scrollIntoView({ behavior: "smooth" });
   };
@@ -26,6 +52,24 @@ export function HeroSection({ onStartChat }: HeroSectionProps) {
 
       {/* Pattern Overlay */}
       <div className="absolute inset-0 pattern-dots opacity-30 z-[1] pointer-events-none" />
+
+      {/* Rotating Bible Verse - Top Right */}
+      <div className="absolute top-28 right-4 md:right-8 lg:right-12 z-20 max-w-[280px] hidden lg:block">
+        {/* Added onClick, hover scale, cursor-pointer, and group utilities */}
+        <div 
+          key={verseIndex} 
+          onClick={handleNextVerse}
+          className="bg-background/40 backdrop-blur-md border border-white/10 p-5 rounded-2xl shadow-xl animate-in fade-in slide-in-from-right-4 duration-700 cursor-pointer transition-all hover:scale-105 hover:bg-background/60 hover:shadow-2xl group"
+        >
+          <Quote className="w-5 h-5 text-primary/70 mb-3 group-hover:text-primary transition-colors" />
+          <p className="text-sm italic text-foreground/90 leading-relaxed mb-3 font-medium select-none">
+            "{farmingVerses[verseIndex].text}"
+          </p>
+          <p className="text-[11px] uppercase tracking-widest text-primary font-bold select-none">
+            — {farmingVerses[verseIndex].ref}
+          </p>
+        </div>
+      </div>
 
       <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-3xl">
@@ -65,7 +109,7 @@ export function HeroSection({ onStartChat }: HeroSectionProps) {
       </div>
 
       {/* Decorative Elements */}
-     <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent z-0 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent z-0 pointer-events-none" />
     </section>
   );
 }
