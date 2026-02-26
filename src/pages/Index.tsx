@@ -28,10 +28,7 @@ const Index = () => {
         <FeaturesSection selectedLanguage={selectedLanguage} />
         <HowItWorksSection selectedLanguage={selectedLanguage} />
         <div ref={chatRef}>
-          <ChatInterface 
-            selectedLanguage={selectedLanguage}
-            onLanguageChange={setSelectedLanguage}
-          />
+          
         </div>
         <LanguagesSection selectedLanguage={selectedLanguage} />
       </main>
