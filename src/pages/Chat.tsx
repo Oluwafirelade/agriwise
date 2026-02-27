@@ -5,8 +5,8 @@ import {
   Sprout, Leaf, Bug, CloudSun, Menu, ArrowLeft, AlertCircle, MessageSquare
 } from "lucide-react"; 
 import { Button } from "@/components/ui/button";
-import { LanguageSelector } from "@/components/LanguageSelector";
-import { ThemeToggle } from "@/components/ThemeToggle";
+import { LanguageSelector } from "@/components/shared/LanguageSelector";
+import { ThemeToggle } from "@/components/shared/ThemeToggle";
 
 // IMPORTANT: Adjust this path to wherever your translations.ts file lives!
 import { getTranslation, LanguageCode } from "@/lib/translations"; 

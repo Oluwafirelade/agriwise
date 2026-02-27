@@ -1,6 +1,9 @@
 import { Sprout, Mail, Phone, MapPin } from "lucide-react";
+import { useNavigate } from "react-router-dom"; // 1. Added import for navigation
 
 export function Footer() {
+  const navigate = useNavigate(); // 2. Initialize navigation hook
+
   // Helper function for smooth scrolling
   const scrollToSection = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
     e.preventDefault();
@@ -72,9 +75,14 @@ export function Footer() {
                 </a>
               </li>
               <li>
+                {/* 3. Updated Try It Now to use navigate */}
                 <a 
-                  href="#chat" 
-                  onClick={(e) => scrollToSection(e, "chat")}
+                  href="/chat" 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    navigate("/chat");
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                  }}
                   className="text-sm text-sidebar-foreground/70 hover:text-sidebar-primary transition-colors cursor-pointer"
                 >
                   Try It Now
@@ -89,7 +97,6 @@ export function Footer() {
             <ul className="space-y-4">
               <li className="flex items-start gap-3">
                 <MapPin className="w-5 h-5 text-sidebar-primary flex-shrink-0 mt-0.5" />
-                {/* Updated this section to link to Google Maps */}
                 <a 
                   href="https://www.google.com/maps/search/?api=1&query=Babcock+University,+Ilishan-Remo,+Nigeria"
                   target="_blank"

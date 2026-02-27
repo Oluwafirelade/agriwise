@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Send, Mic, MicOff, Bot, User, Loader2, Sparkles, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { LanguageSelector, languages } from "./LanguageSelector";
+import { LanguageSelector, languages } from "../shared/LanguageSelector";
 import { getAgriculturalAdvice } from "@/lib/huggingface";
 
 interface Message {

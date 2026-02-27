@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom"; // 1. Added import for navigation
 import { ArrowRight, MessageCircle, Globe2, Leaf, Quote } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import heroImage from "@/assets/hero-farm.jpg";
@@ -13,14 +14,20 @@ const farmingVerses = [
 ];
 
 interface HeroSectionProps {
-  onStartChat: () => void;
+  onStartChat?: () => void; // 2. Made optional to match Header
 }
 
 export function HeroSection({ onStartChat }: HeroSectionProps) {
   const [verseIndex, setVerseIndex] = useState(0);
+  const navigate = useNavigate(); // 3. Initialize navigation hook
+
+  // 4. Create unified function to handle navigation and parent logic
+  const handleStartChatClick = () => {
+    if (onStartChat) onStartChat();
+    navigate("/chat");
+  };
 
   // Rotate verse every 8 seconds. 
-  // Adding verseIndex to the dependency array ensures the timer resets if the user clicks manually.
   useEffect(() => {
     const interval = setInterval(() => {
       setVerseIndex((prevIndex) => (prevIndex + 1) % farmingVerses.length);
@@ -55,7 +62,6 @@ export function HeroSection({ onStartChat }: HeroSectionProps) {
 
       {/* Rotating Bible Verse - Top Right */}
       <div className="absolute top-28 right-4 md:right-8 lg:right-12 z-20 max-w-[280px] hidden lg:block">
-        {/* Added onClick, hover scale, cursor-pointer, and group utilities */}
         <div 
           key={verseIndex} 
           onClick={handleNextVerse}
@@ -95,7 +101,8 @@ export function HeroSection({ onStartChat }: HeroSectionProps) {
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 mb-12 animate-slide-up" style={{ animationDelay: "0.2s" }}>
-            <Button variant="hero" size="xl" onClick={onStartChat} className="group">
+            {/* 5. Updated onClick handler here */}
+            <Button variant="hero" size="xl" onClick={handleStartChatClick} className="group">
               <MessageCircle className="w-5 h-5" />
               Start Asking Questions
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
