@@ -2,8 +2,8 @@ import { Sprout, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom"; // Added for navigation
 import { Button } from "@/components/ui/button";
-import { LanguageSelector } from "./LanguageSelector";
-import { ThemeToggle } from "./ThemeToggle";
+import { LanguageSelector } from "../shared/LanguageSelector";
+import { ThemeToggle } from "../shared/ThemeToggle";
 
 interface HeaderProps {
   selectedLanguage: string;
@@ -38,9 +38,18 @@ export function Header({ selectedLanguage, onLanguageChange, onStartChat }: Head
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/50">
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16 md:h-20">
+    <>
+      {/* Mobile Menu Backdrop */}
+      {mobileMenuOpen && (
+        <div
+          className="md:hidden fixed inset-0 top-16 bg-black/30 backdrop-blur-sm z-40 animate-in fade-in duration-300"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
+
+      <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/50">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
           <button 
             onClick={() => {
@@ -90,20 +99,23 @@ export function Header({ selectedLanguage, onLanguageChange, onStartChat }: Head
           {/* Actions */}
           <div className="flex items-center gap-2 md:gap-3">
             <ThemeToggle />
-            <LanguageSelector 
-              selectedLanguage={selectedLanguage}
-              onLanguageChange={onLanguageChange}
-              variant="glass"
-            />
+            {/* Language selector - desktop only in top bar */}
+            <div className="hidden md:block">
+              <LanguageSelector
+                selectedLanguage={selectedLanguage}
+                onLanguageChange={onLanguageChange}
+                variant="glass"
+              />
+            </div>
             {/* Desktop Get Started */}
-            <Button variant="hero" size="lg" className="hidden sm:flex" onClick={handleStartChat}>
+            <Button variant="hero" size="lg" className="hidden md:flex" onClick={handleStartChat}>
               Get Started
             </Button>
-            
+
             {/* Mobile menu button */}
-            <Button 
-              variant="ghost" 
-              size="icon" 
+            <Button
+              variant="ghost"
+              size="icon"
               className="md:hidden"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
@@ -111,40 +123,49 @@ export function Header({ selectedLanguage, onLanguageChange, onStartChat }: Head
             </Button>
           </div>
         </div>
-
-        {/* Mobile Menu */}
-        {mobileMenuOpen && (
-          <div className="md:hidden py-6 border-t border-border/50 bg-background/95 backdrop-blur-lg animate-in fade-in slide-in-from-top-4 duration-300">
-            <nav className="flex flex-col gap-4">
-              <a 
-                href="#features" 
-                onClick={(e) => scrollToSection(e, "features")}
-                className="text-lg font-medium text-muted-foreground hover:text-foreground transition-colors py-2 px-2 cursor-pointer"
-              >
-                Features
-              </a>
-              <a 
-                href="#how-it-works" 
-                onClick={(e) => scrollToSection(e, "how-it-works")}
-                className="text-lg font-medium text-muted-foreground hover:text-foreground transition-colors py-2 px-2 cursor-pointer"
-              >
-                How It Works
-              </a>
-              <a 
-                href="#languages" 
-                onClick={(e) => scrollToSection(e, "languages")}
-                className="text-lg font-medium text-muted-foreground hover:text-foreground transition-colors py-2 px-2 cursor-pointer"
-              >
-                Languages
-              </a>
-              {/* Mobile Get Started */}
-              <Button variant="hero" size="lg" className="mt-4 w-full" onClick={handleStartChat}>
-                Get Started
-              </Button>
-            </nav>
-          </div>
-        )}
       </div>
-    </header>
+
+      {/* Mobile Menu */}
+      {mobileMenuOpen && (
+        <div className="md:hidden py-6 px-4 border-t border-border/50 bg-background/95 backdrop-blur-lg animate-in fade-in slide-in-from-top-4 duration-300">
+          <nav className="flex flex-col gap-4">
+            <a
+              href="#features"
+              onClick={(e) => scrollToSection(e, "features")}
+              className="text-lg font-medium text-muted-foreground hover:text-foreground transition-colors py-2 px-2 cursor-pointer"
+            >
+              Features
+            </a>
+            <a
+              href="#how-it-works"
+              onClick={(e) => scrollToSection(e, "how-it-works")}
+              className="text-lg font-medium text-muted-foreground hover:text-foreground transition-colors py-2 px-2 cursor-pointer"
+            >
+              How It Works
+            </a>
+            <a
+              href="#languages"
+              onClick={(e) => scrollToSection(e, "languages")}
+              className="text-lg font-medium text-muted-foreground hover:text-foreground transition-colors py-2 px-2 cursor-pointer"
+            >
+              Languages
+            </a>
+            {/* Mobile Language Selector */}
+            <div className="pt-4 border-t border-border/50">
+              <LanguageSelector
+                selectedLanguage={selectedLanguage}
+                onLanguageChange={onLanguageChange}
+                inline
+              />
+            </div>
+            {/* Mobile Get Started */}
+            <Button variant="hero" size="lg" className="mt-4 w-full" onClick={handleStartChat}>
+              Get Started
+            </Button>
+          </nav>
+        </div>
+      )}
+      </header>
+    </>
   );
 }

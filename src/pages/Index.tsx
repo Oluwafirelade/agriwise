@@ -1,11 +1,11 @@
 import { useState, useRef } from "react";
-import { Header } from "@/components/Header";
-import { HeroSection } from "@/components/HeroSection";
-import { FeaturesSection } from "@/components/FeaturesSection";
-import { HowItWorksSection } from "@/components/HowItWorksSection";
-import { ChatInterface } from "@/components/ChatInterface";
-import { LanguagesSection } from "@/components/LanguagesSection";
-import { Footer } from "@/components/Footer";
+import { Header } from "@/components/layout/Header";
+import { HeroSection } from "@/components/landing/HeroSection";
+import { FeaturesSection } from "@/components/landing/FeaturesSection";
+import { HowItWorksSection } from "@/components/landing/HowItWorksSection";
+import { ChatInterface } from "@/components/chat/ChatInterface";
+import { LanguagesSection } from "@/components/landing/LanguagesSection";
+import { Footer } from "@/components/layout/Footer";
 
 const Index = () => {
   const [selectedLanguage, setSelectedLanguage] = useState("en");
