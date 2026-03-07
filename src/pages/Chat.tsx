@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Send, Mic, MicOff, Bot, User, Loader2, Plus,
-  Sprout, Leaf, Bug, CloudSun, Menu, ArrowLeft, AlertCircle, MessageSquare
+  Sprout, Leaf, Bug, CloudSun, Menu, ArrowLeft, AlertCircle, MessageSquare, Trash2
 } from "lucide-react"; 
 import { Button } from "@/components/ui/button";
 import { LanguageSelector } from "@/components/shared/LanguageSelector";
@@ -16,10 +16,9 @@ interface Message {
   id: string;
   role: "user" | "assistant";
   content: string;
-  timestamp: Date | string; // Allow string for localStorage parsing
+  timestamp: Date | string; 
 }
 
-// Updated interface to include the messages for each chat
 interface ChatSession {
   id: string;
   title: string;
@@ -58,7 +57,6 @@ const getLanguageCode = (lang: string) => {
 const Chat = () => {
   const navigate = useNavigate();
   
-  // 1. Initialize sessions from local storage
   const [sessions, setSessions] = useState<ChatSession[]>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem("agriadvisor_sessions");
@@ -67,13 +65,12 @@ const Chat = () => {
     return [];
   });
 
-  // 2. Track the currently active session ID (null means a new, empty chat)
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem("agriadvisor_sessions");
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (parsed.length > 0) return parsed[0].id; // Load most recent by default
+        if (parsed.length > 0) return parsed[0].id; 
       }
     }
     return null;
@@ -92,12 +89,10 @@ const Chat = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
 
-  // 3. Derive current messages from the active session
   const currentSession = sessions.find(s => s.id === currentSessionId);
   const messages = currentSession?.messages || [];
   const hasMessages = messages.length > 0;
 
-  // Save to local storage whenever sessions change
   useEffect(() => {
     localStorage.setItem("agriadvisor_sessions", JSON.stringify(sessions));
   }, [sessions]);
@@ -135,18 +130,28 @@ const Chat = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Handle starting a brand new chat
   const handleNewChat = () => {
     setCurrentSessionId(null);
     setApiError(null);
-    if (window.innerWidth < 1024) setSidebarOpen(false); // Close sidebar on mobile after clicking
+    if (window.innerWidth < 1024) setSidebarOpen(false); 
   };
 
-  // Switch to an existing chat
   const handleSelectSession = (id: string) => {
     setCurrentSessionId(id);
     setApiError(null);
     if (window.innerWidth < 1024) setSidebarOpen(false);
+  };
+
+  // NEW: Handler for deleting a session
+  const handleDeleteSession = (e: React.MouseEvent, idToDelete: string) => {
+    e.stopPropagation(); // Prevents the chat from being selected when you click delete
+    
+    setSessions((prev) => prev.filter(session => session.id !== idToDelete));
+    
+    // If the deleted session was the currently active one, clear the view
+    if (currentSessionId === idToDelete) {
+      setCurrentSessionId(null);
+    }
   };
 
   const handleSend = async (text?: string) => {
@@ -156,7 +161,6 @@ const Chat = () => {
     let targetSessionId = currentSessionId;
     let isNewSession = false;
 
-    // If there's no active session, create one
     if (!targetSessionId) {
       targetSessionId = Date.now().toString();
       isNewSession = true;
@@ -170,7 +174,6 @@ const Chat = () => {
       timestamp: new Date().toISOString(),
     };
 
-    // Update session state optimistically
     setSessions((prev) => {
       if (isNewSession) {
         return [{
@@ -201,7 +204,6 @@ const Chat = () => {
         timestamp: new Date().toISOString(),
       };
       
-      // Add AI response to the correct session
       setSessions((prev) => prev.map(s => 
         s.id === targetSessionId 
           ? { ...s, messages: [...s.messages, aiMessage] } 
@@ -282,18 +284,29 @@ const Chat = () => {
             </div>
           ) : (
             sessions.map(session => (
-              <button 
-                key={session.id} 
-                onClick={() => handleSelectSession(session.id)}
-                className={`w-full flex items-center gap-3 text-left px-4 py-2.5 rounded-2xl text-sm transition-colors ${
-                  currentSessionId === session.id 
-                    ? "bg-primary/10 text-primary font-medium" 
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                }`}
-              >
-                <MessageSquare className="w-4 h-4 flex-shrink-0" />
-                <span className="truncate">{session.title}</span>
-              </button>
+              // NEW: Wrapped in a relative group div to hold both buttons
+              <div key={session.id} className="relative group flex items-center">
+                <button 
+                  onClick={() => handleSelectSession(session.id)}
+                  className={`w-full flex items-center gap-3 text-left px-4 py-2.5 rounded-2xl text-sm transition-colors pr-10 ${
+                    currentSessionId === session.id 
+                      ? "bg-primary/10 text-primary font-medium" 
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  }`}
+                >
+                  <MessageSquare className="w-4 h-4 flex-shrink-0" />
+                  <span className="truncate">{session.title}</span>
+                </button>
+                
+                {/* NEW: Delete Button */}
+                <button
+                  onClick={(e) => handleDeleteSession(e, session.id)}
+                  className="absolute right-2 p-1.5 text-muted-foreground opacity-0 group-hover:opacity-100 hover:text-destructive hover:bg-destructive/10 rounded-full transition-all focus:opacity-100"
+                  title="Delete chat"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
             ))
           )}
         </div>
