@@ -2,7 +2,8 @@ import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Send, Mic, MicOff, Bot, User, Loader2, Plus,
-  Sprout, Leaf, Bug, CloudSun, Menu, ArrowLeft, AlertCircle, MessageSquare, Trash2
+  Sprout, Leaf, Bug, CloudSun, Menu, ArrowLeft, AlertCircle, MessageSquare,
+  LogIn, Trash2
 } from "lucide-react"; 
 import { Button } from "@/components/ui/button";
 import { LanguageSelector } from "@/components/shared/LanguageSelector";
@@ -71,6 +72,7 @@ const Chat = () => {
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed.length > 0) return parsed[0].id; 
+        if (parsed.length > 0) return parsed[0].id; 
       }
     }
     return null;
@@ -133,6 +135,7 @@ const Chat = () => {
   const handleNewChat = () => {
     setCurrentSessionId(null);
     setApiError(null);
+    if (window.innerWidth < 1024) setSidebarOpen(false); 
     if (window.innerWidth < 1024) setSidebarOpen(false); 
   };
 
@@ -241,7 +244,7 @@ const Chat = () => {
         />
       )}
 
-    {/* Sidebar Area */}
+      {/* Sidebar Area */}
       <aside 
         className={`fixed lg:static inset-y-0 left-0 z-50 w-72 flex-shrink-0 bg-background border-r border-border flex flex-col transition-all duration-300 ease-in-out ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0 lg:-ml-72"
@@ -311,10 +314,11 @@ const Chat = () => {
           )}
         </div>
 
-        <div className="p-4 border-t border-border/50 bg-background">
+        <div className="p-4 border-t border-border/50 bg-background flex justify-center">
           <LanguageSelector 
             selectedLanguage={selectedLanguage} 
             onLanguageChange={(lang) => setSelectedLanguage(lang as LanguageCode)} 
+            variant="glass"
           />
         </div>
       </aside>
@@ -338,14 +342,21 @@ const Chat = () => {
             )}
           </div>
           
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             <ThemeToggle />
             <button 
               onClick={handleGoHome} 
-              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors px-3 py-1.5 rounded-full hover:bg-muted"
+              className="hidden sm:flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors px-3 py-1.5 rounded-full hover:bg-muted"
             >
               <ArrowLeft className="w-4 h-4" /> Home
             </button>
+            <Button 
+              size="sm" 
+              className="rounded-full px-4 flex items-center gap-2 font-medium"
+              onClick={() => navigate('/login')}
+            >
+              <LogIn className="w-4 h-4 hidden sm:block" /> Login
+            </Button>
           </div>
         </header>
 

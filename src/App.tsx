@@ -4,7 +4,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
-import Chat from "./pages/Chat"; // 
+import Chat from "./pages/Chat"; 
+import Login from "./pages/Login"; // <-- ADDED IMPORT
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -20,6 +21,9 @@ const App = () => (
           
           {/* Main Chat Route */}
           <Route path="/chat" element={<Chat />} />
+
+          {/* <-- ADDED LOGIN ROUTE --> */}
+          <Route path="/login" element={<Login />} />
           
           {/* Catch-all for 404s */}
           <Route path="*" element={<NotFound />} />
