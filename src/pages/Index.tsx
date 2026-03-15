@@ -1,11 +1,11 @@
 import { useState, useRef } from "react";
-import { Header } from "@/components/Header";
-import { HeroSection } from "@/components/HeroSection";
-import { FeaturesSection } from "@/components/FeaturesSection";
-import { HowItWorksSection } from "@/components/HowItWorksSection";
-import { ChatInterface } from "@/components/ChatInterface";
-import { LanguagesSection } from "@/components/LanguagesSection";
-import { Footer } from "@/components/Footer";
+import { Header } from "@/components/layout/Header";
+import { HeroSection } from "@/components/landing/HeroSection";
+import { FeaturesSection } from "@/components/landing/FeaturesSection";
+import { HowItWorksSection } from "@/components/landing/HowItWorksSection";
+import { ChatInterface } from "@/components/chat/ChatInterface";
+import { LanguagesSection } from "@/components/landing/LanguagesSection";
+import { Footer } from "@/components/layout/Footer";
 
 const Index = () => {
   const [selectedLanguage, setSelectedLanguage] = useState("en");
@@ -20,22 +20,20 @@ const Index = () => {
       <Header 
         selectedLanguage={selectedLanguage}
         onLanguageChange={setSelectedLanguage}
+        onStartChat={scrollToChat}
       />
       
       <main>
-        <HeroSection onStartChat={scrollToChat} />
-        <FeaturesSection />
-        <HowItWorksSection />
+        <HeroSection onStartChat={scrollToChat}  />
+        <FeaturesSection selectedLanguage={selectedLanguage} />
+        <HowItWorksSection selectedLanguage={selectedLanguage} />
         <div ref={chatRef}>
-          <ChatInterface 
-            selectedLanguage={selectedLanguage}
-            onLanguageChange={setSelectedLanguage}
-          />
+          
         </div>
-        <LanguagesSection />
+        <LanguagesSection selectedLanguage={selectedLanguage} />
       </main>
 
-      <Footer />
+      <Footer  />
     </div>
   );
 };
