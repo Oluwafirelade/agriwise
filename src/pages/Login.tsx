@@ -14,7 +14,7 @@ const GoogleIcon = () => (
   </svg>
 );
 
-const getFirebaseErrorMessage = (code: string): string => {
+const getFirebaseErrorMessage = (code: string, fallbackMessage?: string): string => {
   const messages: Record<string, string> = {
     "auth/email-already-in-use": "An account with this email already exists.",
     "auth/invalid-email": "Please enter a valid email address.",
@@ -25,8 +25,16 @@ const getFirebaseErrorMessage = (code: string): string => {
     "auth/too-many-requests": "Too many attempts. Please try again later.",
     "auth/popup-closed-by-user": "Google sign-in was cancelled.",
     "auth/network-request-failed": "Network error. Please check your connection.",
+    "auth/operation-not-allowed": "Email/password sign-in is disabled. Enable it in Firebase Console.",
+    "auth/user-disabled": "This user account has been disabled.",
+    "auth/missing-email": "Please provide an email address.",
+    "auth/missing-password": "Please provide a password.",
+    "auth/invalid-password": "Invalid password. Please check your entry.",
+    "auth/invalid-api-key": "Firebase API key is invalid. Verify VITE_FIREBASE_API_KEY in Vercel and .env.",
+    "auth/app-not-authorized": "Firebase project not authorized for this API key.",
+    "auth/unauthorized-domain": "This domain is not authorized in Firebase auth settings.",
   };
-  return messages[code] || "Something went wrong. Please try again.";
+  return messages[code] || fallbackMessage || "Something went wrong. Please try again.";
 };
 
 const Login = () => {
@@ -65,8 +73,11 @@ const Login = () => {
       }
       navigate("/chat");
     } catch (err) {
+      console.error("Login submit error", err);
       if (err instanceof FirebaseError) {
-        setError(getFirebaseErrorMessage(err.code));
+        setError(getFirebaseErrorMessage(err.code, err.message));
+      } else if (err instanceof Error) {
+        setError(err.message);
       } else {
         setError("Something went wrong. Please try again.");
       }
@@ -83,8 +94,11 @@ const Login = () => {
       await signInWithGoogle();
       navigate("/chat");
     } catch (err) {
+      console.error("Google login error", err);
       if (err instanceof FirebaseError) {
-        setError(getFirebaseErrorMessage(err.code));
+        setError(getFirebaseErrorMessage(err.code, err.message));
+      } else if (err instanceof Error) {
+        setError(err.message);
       } else {
         setError("Something went wrong. Please try again.");
       }
