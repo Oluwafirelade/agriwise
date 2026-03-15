@@ -3,11 +3,12 @@ import { useNavigate } from "react-router-dom";
 import {
   Send, Mic, MicOff, Bot, User, Loader2, Plus,
   Sprout, Leaf, Bug, CloudSun, Menu, ArrowLeft, AlertCircle, MessageSquare,
-  LogIn, Trash2
-} from "lucide-react"; 
+  LogIn, LogOut, Trash2
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LanguageSelector } from "@/components/shared/LanguageSelector";
 import { ThemeToggle } from "@/components/shared/ThemeToggle";
+import { useAuth } from "@/contexts/AuthContext";
 
 // IMPORTANT: Adjust this path to wherever your translations.ts file lives!
 import { getTranslation, LanguageCode } from "@/lib/translations"; 
@@ -57,6 +58,7 @@ const getLanguageCode = (lang: string) => {
 
 const Chat = () => {
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
   
   const [sessions, setSessions] = useState<ChatSession[]>(() => {
     if (typeof window !== 'undefined') {
@@ -350,12 +352,21 @@ const Chat = () => {
             >
               <ArrowLeft className="w-4 h-4" /> Home
             </button>
-            <Button 
-              size="sm" 
+            <Button
+              size="sm"
               className="rounded-full px-4 flex items-center gap-2 font-medium"
-              onClick={() => navigate('/login')}
+              onClick={user ? logout : () => navigate('/login')}
             >
-              <LogIn className="w-4 h-4 hidden sm:block" /> Login
+              {user ? (
+                <>
+                  <LogOut className="w-4 h-4 hidden sm:block" />
+                  <span className="truncate max-w-[100px]">{user.displayName || user.email}</span>
+                </>
+              ) : (
+                <>
+                  <LogIn className="w-4 h-4 hidden sm:block" /> Login
+                </>
+              )}
             </Button>
           </div>
         </header>

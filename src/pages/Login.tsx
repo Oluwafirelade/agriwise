@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Sprout, Mail, Lock, User, ArrowLeft, Eye, EyeOff, Loader2 } from "lucide-react";
+import { Sprout, Mail, Lock, User, ArrowLeft, Eye, EyeOff, Loader2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
+import { FirebaseError } from "firebase/app";
 
-// Extracted Google Icon for cleaner component body
 const GoogleIcon = () => (
   <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" aria-hidden="true">
     <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
@@ -13,73 +14,109 @@ const GoogleIcon = () => (
   </svg>
 );
 
+const getFirebaseErrorMessage = (code: string): string => {
+  const messages: Record<string, string> = {
+    "auth/email-already-in-use": "An account with this email already exists.",
+    "auth/invalid-email": "Please enter a valid email address.",
+    "auth/weak-password": "Password should be at least 6 characters.",
+    "auth/user-not-found": "No account found with this email.",
+    "auth/wrong-password": "Incorrect password. Please try again.",
+    "auth/invalid-credential": "Invalid email or password.",
+    "auth/too-many-requests": "Too many attempts. Please try again later.",
+    "auth/popup-closed-by-user": "Google sign-in was cancelled.",
+    "auth/network-request-failed": "Network error. Please check your connection.",
+  };
+  return messages[code] || "Something went wrong. Please try again.";
+};
+
 const Login = () => {
   const navigate = useNavigate();
-  
-  // Modes
+  const { signIn, signUp, signInWithGoogle } = useAuth();
+
   const [isSignUp, setIsSignUp] = useState(false);
-  
-  // Form State
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: ""
   });
-  
-  // UI State
+
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Handlers
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    setError(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
-    // Simulate API Auth Request
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    setIsLoading(false);
-    navigate("/chat");
+    setError(null);
+
+    try {
+      if (isSignUp) {
+        await signUp(formData.name, formData.email, formData.password);
+      } else {
+        await signIn(formData.email, formData.password);
+      }
+      navigate("/chat");
+    } catch (err) {
+      if (err instanceof FirebaseError) {
+        setError(getFirebaseErrorMessage(err.code));
+      } else {
+        setError("Something went wrong. Please try again.");
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleGoogleLogin = async () => {
     setIsGoogleLoading(true);
-    
-    // Simulate Google OAuth Request
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    setIsGoogleLoading(false);
-    navigate("/chat");
+    setError(null);
+
+    try {
+      await signInWithGoogle();
+      navigate("/chat");
+    } catch (err) {
+      if (err instanceof FirebaseError) {
+        setError(getFirebaseErrorMessage(err.code));
+      } else {
+        setError("Something went wrong. Please try again.");
+      }
+    } finally {
+      setIsGoogleLoading(false);
+    }
   };
 
   const isFormDisabled = isLoading || isGoogleLoading;
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4 relative overflow-hidden">
-      
+
       {/* Decorative Background Effects */}
       <div className="absolute -top-24 -left-24 w-96 h-96 bg-primary/10 rounded-full blur-[100px] pointer-events-none" />
       <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-secondary/10 rounded-full blur-[100px] pointer-events-none" />
       <div className="absolute inset-0 pattern-dots opacity-20 pointer-events-none" />
 
       {/* Navigation */}
-      <Button 
-        variant="ghost" 
-        onClick={() => navigate(-1)} 
+      <Button
+        variant="ghost"
+        onClick={() => navigate(-1)}
         className="absolute top-6 left-6 z-20 flex items-center gap-2 bg-background/50 backdrop-blur-sm border border-border rounded-full px-4 py-2 hover:bg-muted"
         disabled={isFormDisabled}
       >
-        <ArrowLeft className="w-4 h-4" /> 
+        <ArrowLeft className="w-4 h-4" />
         <span>Back</span>
       </Button>
 
       {/* Auth Container */}
       <main className="w-full max-w-md bg-background/80 backdrop-blur-xl border border-border/50 rounded-3xl shadow-xl p-6 sm:p-8 z-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
-        
+
         {/* Header */}
         <header className="flex flex-col items-center mb-8 text-center">
           <div className="w-14 h-14 rounded-2xl bg-gradient-hero flex items-center justify-center shadow-md mb-4">
@@ -89,8 +126,8 @@ const Login = () => {
             {isSignUp ? "Create an Account" : "Welcome Back"}
           </h1>
           <p className="text-sm text-muted-foreground mt-2">
-            {isSignUp 
-              ? "Join AgriAdvisor to get personalized farming advice." 
+            {isSignUp
+              ? "Join AgriAdvisor to get personalized farming advice."
               : "Sign in to continue your farming journey."}
           </p>
         </header>
@@ -99,7 +136,7 @@ const Login = () => {
         <div className="flex p-1 bg-muted/50 rounded-xl mb-8 border border-border/50">
           <button
             type="button"
-            onClick={() => setIsSignUp(false)}
+            onClick={() => { setIsSignUp(false); setError(null); }}
             disabled={isFormDisabled}
             className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
               !isSignUp ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"
@@ -109,7 +146,7 @@ const Login = () => {
           </button>
           <button
             type="button"
-            onClick={() => setIsSignUp(true)}
+            onClick={() => { setIsSignUp(true); setError(null); }}
             disabled={isFormDisabled}
             className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
               isSignUp ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"
@@ -119,16 +156,24 @@ const Login = () => {
           </button>
         </div>
 
+        {/* Error Display */}
+        {error && (
+          <div className="flex items-center gap-2 p-3 mb-5 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-xl animate-in fade-in slide-in-from-top-2">
+            <AlertCircle className="w-4 h-4 flex-shrink-0" />
+            <span>{error}</span>
+          </div>
+        )}
+
         {/* Auth Form */}
         <form onSubmit={handleSubmit} className="space-y-5">
-          
+
           {/* Name Input */}
           {isSignUp && (
             <div className="space-y-1.5 animate-in fade-in slide-in-from-top-2">
               <label htmlFor="name" className="text-sm font-medium text-foreground ml-1">Full Name</label>
               <div className="relative">
                 <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-                <input 
+                <input
                   id="name"
                   name="name"
                   type="text"
@@ -148,7 +193,7 @@ const Login = () => {
             <label htmlFor="email" className="text-sm font-medium text-foreground ml-1">Email</label>
             <div className="relative">
               <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-              <input 
+              <input
                 id="email"
                 name="email"
                 type="email"
@@ -167,8 +212,8 @@ const Login = () => {
             <div className="flex items-center justify-between ml-1">
               <label htmlFor="password" className="text-sm font-medium text-foreground">Password</label>
               {!isSignUp && (
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   className="text-xs text-primary hover:underline font-medium"
                   disabled={isFormDisabled}
                 >
@@ -178,7 +223,7 @@ const Login = () => {
             </div>
             <div className="relative">
               <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-              <input 
+              <input
                 id="password"
                 name="password"
                 type={showPassword ? "text" : "password"}
@@ -202,9 +247,9 @@ const Login = () => {
           </div>
 
           {/* Submit Action */}
-          <Button 
-            type="submit" 
-            variant="hero" 
+          <Button
+            type="submit"
+            variant="hero"
             className="w-full py-6 mt-2 text-base font-semibold"
             disabled={isFormDisabled}
           >
@@ -231,9 +276,9 @@ const Login = () => {
         </div>
 
         {/* Google OAuth Action */}
-        <Button 
-          type="button" 
-          variant="outline" 
+        <Button
+          type="button"
+          variant="outline"
           className="w-full py-6 text-base font-medium bg-background/50 hover:bg-muted"
           onClick={handleGoogleLogin}
           disabled={isFormDisabled}
