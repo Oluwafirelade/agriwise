@@ -3,53 +3,35 @@
  * Uses Node.js backend to call Hugging Face API
  * This solves CORS issues and keeps API key secure
  */
+const API_BASE_URL = "https://mrcahrles00-agriwise-backend.hf.space";
 
-const API_BASE_URL = "http://localhost:8000";
-/**
- * Get agricultural advice from backend server
- */
 export async function getAgriculturalAdvice(
-  userQuery: string,
+  userQuery: string, 
   language: string
 ): Promise<string> {
   try {
     const response = await fetch(`${API_BASE_URL}/api/agricultural-advice`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         query: userQuery,
-        language: language,
+        language: language, // We still send this as a "hint"
       }),
     });
 
-    if (!response.ok) {
-      throw new Error(`API Error: ${response.statusText}`);
-    }
+    if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
 
     const data = await response.json();
-    
-    // Return AI response or fallback
-    if (data.response) {
-      return data.response;
-    }
-    
-    if (data.error) {
-      throw new Error(data.error);
-    }
-
-    throw new Error("No response from API");
+    return data.response || "No response received.";
   } catch (error) {
     console.error("Agricultural Advice Error:", error);
-    // Return fallback response
-    return getFallbackResponse(userQuery, language);
+    return "Sorry, I am having trouble connecting to the advisor. Please try again shortly.";
   }
 }
 
 
 /**
- * Fallback response when API fails (keyword-based simple matching)
+ * Fallback response when API fails
  */
 function getFallbackResponse(userQuery: string, language: string): string {
   const queryLower = userQuery.toLowerCase();
@@ -57,40 +39,35 @@ function getFallbackResponse(userQuery: string, language: string): string {
   const responses: Record<string, Record<string, string>> = {
     en: {
       yellowing: "Yellowing leaves usually indicate nutrient deficiency (Nitrogen) or improper watering. Apply balanced fertilizer and ensure proper drainage.",
-      disease: "For plant diseases, identify the symptoms first. Common solutions: Remove affected parts, apply fungicide, improve air circulation, and practice crop rotation.",
-      pest: "For pest control, use organic methods when possible: neem oil spray, companion planting, or handpicking. Chemical pesticides should be a last resort.",
-      watering: "Water deeply but less frequently to encourage deep root growth. Morning watering is best to reduce disease. Check soil moisture before watering.",
-      fertilizer: "Use balanced NPK fertilizer (10-10-10) for general crops. Adjust based on crop type: more Nitrogen for leafy crops, more Phosphorus for flowering.",
-      planting: "Prepare soil with compost, ensure good drainage, plant at recommended depth and spacing, and keep soil moist for germination.",
-      default: "For detailed advice on your farming question, please describe the issue more specifically including crop type, symptoms, and current farming practices.",
+      disease: "For plant diseases, identify the symptoms first. Remove affected parts, apply fungicide if needed, improve air circulation, and practice crop rotation.",
+      pest: "For pest control, use organic methods: neem oil spray, companion planting, or handpicking.",
+      default: "For detailed advice, please describe the issue more specifically including crop type, symptoms, and current farming practices.",
     },
     ha: {
-      yellowing: "Rawaya ganye yakan nuna karancin abubuwan gida (Nitrogen) ko ba aiki dishi. Zuba taki mai daidaituwa kuma tabbatar da kyakkyawan fikitarwa.",
-      disease: "Don cutarren ganye, sannu da alamun aiki. Mafita: Cire waje marubuta, zuba mace, sa'a iskar kai, da musanya habaye.",
-      default: "Don cikakken shawara akan bukatar noma, ka bayyana matsala kuma inganta nau'i na shuke, alamun aiki, da ayyuka na noma.",
+      yellowing: "Rawaya ganye yakan nuna karancin abubuwan gida (Nitrogen). Zuba taki mai daidaitattun abubuwa.",
+      default: "Don cikakken shawara, bayyana matsalar da kyau ciki har da nau'in amfanin gona da alamomi.",
     },
     yo: {
-      yellowing: "Ewé tó di pupa jẹ́ ami ti aipe ounjẹ (Nitrogen) tabi omi ti ò̀ṣe lọ́ìlọ́. Lo ajile ti o ni iwọntunwọnsi àti rí dájú isọ daradara.",
-      disease: "Nípasẹ̀ àìmọ̀ ọ̀ran ìsìn, ṣe àyẹ̀wò awọn aami. Iranlọ́wọ́: Mú ẹ̀kọ́ ìsìn, lo oogun, ṣe jìjìn afẹfẹ, àti ṣèdúpẹ́.",
-      default: "Fún ìmọ̀ ni pẹlúpẹlú lórí ibeere noma rẹ, ṣalaye iṣoro àti ìrò irugbin, awọn aami, àti iṣẹ noma.",
+      yellowing: "Ewé tó di pupa jẹ ami ti aipe ounje (Nitrogen). Lo ajile tó ni iwontunwonsi.",
+      default: "Fún ọ pẹlù ìmọ̀ tí ó tọ́, ẹ jọwọ ṣàpèjúwe ìṣòro náà ní ẹ̀tọ́.",
     },
     ig: {
-      yellowing: "Akwụkwọ akpụ na-acha odo odo na-egosi enweghị nri ma ọ bụ mmiri ezi. Tinye takin ma hụ na mmiri na-asọpụ nke ọma.",
-      disease: "Maka ọrịa ihe ọkụkụ, mata ihe mgbaàmà nke ọma. Ihe ọ kwesiri ịme: Ewepụ akpụ ọrịa, tinyere ọgwụ, gbaa ikuku, na mezie ugbo.",
-      default: "Maka iminye nke ziri ezi gbasara ajụjụ ugbo gị, kọwaa nsogbu na ụdị ihe ọkụkụ, ihe mgbaàmà, na ihe ị na-eme.",
+      yellowing: "Akwụkwọ na-acha odo odo na-egosi enweghị nri. Tinye takin na hụ na mmiri ezi.",
+      default: "Maka ozi zuru oke, kọọ nsogbu ahụ nke ọma gụnyere ụdị ihe ọkụkụ.",
+    },
+    pcm: {
+      yellowing: "Wen leaves don turn yellow, e mean say di plant no get enough nitrogen. Apply fertilizer well well.",
+      default: "Abeg describe di problem well well make we fit help you better.",
     },
   };
 
-  // Check for keywords in query
-  for (const [key, message] of Object.entries(
-    responses[language] || responses.en
-  )) {
+  const langResponses = responses[language] || responses.en;
+
+  for (const [key, message] of Object.entries(langResponses)) {
     if (queryLower.includes(key)) {
       return message;
     }
   }
 
-  // Return default response if no keywords match
-  return responses[language]?.default || responses.en.default;
+  return langResponses.default || responses.en.default;
 }
-
