@@ -41,7 +41,7 @@ const suggestionCards = [
   },
   { 
     icon: CloudSun, 
-    labels: { en: "Planting season", ha: "Lokacin dasa", yo: "Akoko gbingbin", ig: "Oge ịkụ ihe" },
+    labels: { en: "Planting season", ha: "Lokacin dasa", yo: "Akoko gbingbin", ig: "Oge ịkụihe" },
     prompts: { en: "When should I plant maize?", ha: "Yaushe zan dasa masara?", yo: "Nigba wo ni mo yẹ ki n gbin agbado?", ig: "Kedu oge m ga-akụ ọka?" }
   },
   { 
@@ -74,7 +74,6 @@ const Chat = () => {
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed.length > 0) return parsed[0].id; 
-        if (parsed.length > 0) return parsed[0].id; 
       }
     }
     return null;
@@ -92,6 +91,7 @@ const Chat = () => {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const currentSession = sessions.find(s => s.id === currentSessionId);
   const messages = currentSession?.messages || [];
@@ -112,6 +112,10 @@ const Chat = () => {
         const transcript = event.results[0][0].transcript;
         setInput(transcript);
         setIsRecording(false);
+        if (textareaRef.current) {
+          textareaRef.current.style.height = 'auto';
+          textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+        }
       };
 
       recognitionRef.current.onerror = () => setIsRecording(false);
@@ -138,7 +142,6 @@ const Chat = () => {
     setCurrentSessionId(null);
     setApiError(null);
     if (window.innerWidth < 1024) setSidebarOpen(false); 
-    if (window.innerWidth < 1024) setSidebarOpen(false); 
   };
 
   const handleSelectSession = (id: string) => {
@@ -147,15 +150,19 @@ const Chat = () => {
     if (window.innerWidth < 1024) setSidebarOpen(false);
   };
 
-  // NEW: Handler for deleting a session
   const handleDeleteSession = (e: React.MouseEvent, idToDelete: string) => {
-    e.stopPropagation(); // Prevents the chat from being selected when you click delete
-    
+    e.stopPropagation(); 
     setSessions((prev) => prev.filter(session => session.id !== idToDelete));
-    
-    // If the deleted session was the currently active one, clear the view
     if (currentSessionId === idToDelete) {
       setCurrentSessionId(null);
+    }
+  };
+
+  const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setInput(e.target.value);
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
     }
   };
 
@@ -198,6 +205,10 @@ const Chat = () => {
     setInput("");
     setIsLoading(true);
     setApiError(null);
+    
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+    }
 
     try {
       const aiResponse = await getAgriculturalAdvice(messageText, selectedLanguage);
@@ -289,7 +300,6 @@ const Chat = () => {
             </div>
           ) : (
             sessions.map(session => (
-              // NEW: Wrapped in a relative group div to hold both buttons
               <div key={session.id} className="relative group flex items-center">
                 <button 
                   onClick={() => handleSelectSession(session.id)}
@@ -303,7 +313,6 @@ const Chat = () => {
                   <span className="truncate">{session.title}</span>
                 </button>
                 
-                {/* NEW: Delete Button */}
                 <button
                   onClick={(e) => handleDeleteSession(e, session.id)}
                   className="absolute right-2 p-1.5 text-muted-foreground opacity-0 group-hover:opacity-100 hover:text-destructive hover:bg-destructive/10 rounded-full transition-all focus:opacity-100"
@@ -314,14 +323,6 @@ const Chat = () => {
               </div>
             ))
           )}
-        </div>
-
-        <div className="p-4 border-t border-border/50 bg-background flex justify-center">
-          <LanguageSelector 
-            selectedLanguage={selectedLanguage} 
-            onLanguageChange={(lang) => setSelectedLanguage(lang as LanguageCode)} 
-            variant="glass"
-          />
         </div>
       </aside>
 
@@ -378,19 +379,31 @@ const Chat = () => {
                 {getTranslation(selectedLanguage, "chatWelcome")}
               </h1>
               <div className="max-w-2xl w-full">
-                <div className="relative mb-6 md:mb-8 bg-muted border border-border rounded-3xl p-2 md:p-3 flex items-center shadow-sm focus-within:ring-1 focus-within:ring-primary/50 transition-shadow">
+                <div className="relative mb-6 md:mb-8 bg-muted border border-border rounded-3xl p-2 md:p-3 flex items-end shadow-sm focus-within:ring-1 focus-within:ring-primary/50 transition-shadow gap-2">
                    <textarea
+                    ref={textareaRef}
                     value={input}
-                    onChange={(e) => setInput(e.target.value)}
+                    onChange={handleTextareaChange}
                     onKeyDown={handleKeyDown}
                     placeholder={getTranslation(selectedLanguage, "chatPlaceholderAsk")}
-                    className="flex-1 bg-transparent outline-none resize-none text-sm md:text-base px-3 py-2 text-foreground"
+                    className="flex-1 bg-transparent outline-none resize-none text-sm md:text-base px-3 py-2 text-foreground max-h-32 overflow-y-auto"
                     rows={1}
                   />
-                  <button onClick={toggleRecording} className={`mx-1 p-2 rounded-full hover:bg-background transition-colors ${isRecording ? "text-destructive animate-pulse" : "text-muted-foreground"}`}>
-                    {isRecording ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
-                  </button>
-                  <Button onClick={() => handleSend()} disabled={!input.trim() || isLoading} variant="hero" size="icon" className="rounded-full w-10 h-10 flex-shrink-0"><Send className="w-4 h-4" /></Button>
+                  <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0 pb-1">
+                    <div className="w-24 sm:w-28">
+                      <LanguageSelector 
+                        selectedLanguage={selectedLanguage} 
+                        onLanguageChange={(lang) => setSelectedLanguage(lang as LanguageCode)} 
+                        variant="glass"
+                      />
+                    </div>
+                    <button onClick={toggleRecording} className={`p-2 rounded-full hover:bg-background transition-colors ${isRecording ? "text-destructive animate-pulse" : "text-muted-foreground"}`}>
+                      {isRecording ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+                    </button>
+                    <Button onClick={() => handleSend()} disabled={!input.trim() || isLoading} variant="hero" size="icon" className="rounded-full w-10 h-10 flex-shrink-0">
+                      <Send className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </div>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -416,7 +429,8 @@ const Chat = () => {
                     {m.role === "user" ? <User className="w-4 h-4 text-secondary" /> : <Bot className="w-4 h-4 text-primary" />}
                   </div>
                   <div className={`max-w-[80%] rounded-2xl px-4 py-3 shadow-sm ${m.role === "user" ? "bg-secondary text-secondary-foreground rounded-br-2xl rounded-tr-sm" : "bg-muted text-foreground rounded-bl-2xl rounded-tl-sm border border-border/50"}`}>
-                    <p className="text-sm leading-relaxed whitespace-pre-wrap">{m.content}</p>
+                    {/* ADDED break-words HERE TO FIX OVERFLOW */}
+                    <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{m.content}</p>
                   </div>
                 </div>
               ))}
@@ -441,19 +455,31 @@ const Chat = () => {
 
         {hasMessages && (
           <div className="p-3 md:p-4 bg-background border-t border-border/30">
-            <div className="max-w-3xl mx-auto flex items-center gap-2 md:gap-3 bg-muted border border-border rounded-3xl px-3 md:px-4 py-2 md:py-3 shadow-sm focus-within:ring-1 focus-within:ring-primary/50 transition-shadow">
+            <div className="max-w-3xl mx-auto flex items-end gap-2 md:gap-3 bg-muted border border-border rounded-3xl px-3 md:px-4 py-2 md:py-3 shadow-sm focus-within:ring-1 focus-within:ring-primary/50 transition-shadow">
               <textarea 
+                ref={textareaRef}
                 value={input} 
-                onChange={(e) => setInput(e.target.value)} 
+                onChange={handleTextareaChange} 
                 onKeyDown={handleKeyDown} 
-                className="flex-1 bg-transparent outline-none text-sm md:text-base resize-none text-foreground py-1" 
+                className="flex-1 bg-transparent outline-none text-sm md:text-base resize-none text-foreground py-2 max-h-32 overflow-y-auto" 
                 rows={1} 
                 placeholder={getTranslation(selectedLanguage, "chatPlaceholderFollowUp")} 
               />
-              <button onClick={toggleRecording} className={`p-2 flex-shrink-0 rounded-full hover:bg-background transition-colors ${isRecording ? "text-destructive animate-pulse" : "text-muted-foreground"}`}>
-                {isRecording ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
-              </button>
-              <Button onClick={() => handleSend()} disabled={!input.trim() || isLoading} variant="hero" size="icon" className="w-10 h-10 rounded-full flex-shrink-0"><Send className="w-4 h-4" /></Button>
+              <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0 pb-1">
+                <div className="w-24 sm:w-28">
+                  <LanguageSelector 
+                    selectedLanguage={selectedLanguage} 
+                    onLanguageChange={(lang) => setSelectedLanguage(lang as LanguageCode)} 
+                    variant="glass"
+                  />
+                </div>
+                <button onClick={toggleRecording} className={`p-2 flex-shrink-0 rounded-full hover:bg-background transition-colors ${isRecording ? "text-destructive animate-pulse" : "text-muted-foreground"}`}>
+                  {isRecording ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+                </button>
+                <Button onClick={() => handleSend()} disabled={!input.trim() || isLoading} variant="hero" size="icon" className="w-10 h-10 rounded-full flex-shrink-0">
+                  <Send className="w-4 h-4" />
+                </Button>
+              </div>
             </div>
           </div>
         )}
