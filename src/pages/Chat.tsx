@@ -101,36 +101,60 @@ const Chat = () => {
     localStorage.setItem("agriadvisor_sessions", JSON.stringify(sessions));
   }, [sessions]);
 
-  useEffect(() => {
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (SpeechRecognition) {
-      recognitionRef.current = new SpeechRecognition();
-      recognitionRef.current.continuous = false;
-      recognitionRef.current.interimResults = false;
-
-      recognitionRef.current.onresult = (event: any) => {
-        const transcript = event.results[0][0].transcript;
-        setInput(transcript);
-        setIsRecording(false);
-        if (textareaRef.current) {
-          textareaRef.current.style.height = 'auto';
-          textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
-        }
-      };
-
-      recognitionRef.current.onerror = () => setIsRecording(false);
-      recognitionRef.current.onend = () => setIsRecording(false);
-    }
-  }, []);
-
+  // Handle Speech Recognition securely inside the toggle function
   const toggleRecording = () => {
-    if (isRecording) {
-      recognitionRef.current?.stop();
-    } else {
-      setApiError(null);
-      recognitionRef.current.lang = getLanguageCode(selectedLanguage);
-      recognitionRef.current?.start();
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    
+    if (!SpeechRecognition) {
+      setApiError("Voice recognition is not supported in this browser. Please type your message.");
+      return;
+    }
+
+    if (isRecording && recognitionRef.current) {
+      recognitionRef.current.stop();
+      setIsRecording(false);
+      return;
+    }
+
+    setApiError(null);
+    const recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = getLanguageCode(selectedLanguage);
+
+    recognition.onstart = () => {
       setIsRecording(true);
+    };
+
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      setInput((prev) => (prev ? `${prev} ${transcript}` : transcript));
+      
+      if (textareaRef.current) {
+        textareaRef.current.style.height = 'auto';
+        textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+      }
+    };
+
+    recognition.onerror = (event: any) => {
+      setIsRecording(false);
+      if (event.error === 'not-allowed') {
+        setApiError("Microphone permission denied. Please allow mic access in your browser settings.");
+      } else if (event.error !== 'aborted') {
+        setApiError(`Microphone error: ${event.error}`);
+      }
+    };
+
+    recognition.onend = () => {
+      setIsRecording(false);
+    };
+
+    recognitionRef.current = recognition;
+    try {
+      recognition.start();
+    } catch (err) {
+      setIsRecording(false);
+      setApiError("Could not start microphone. It might already be in use.");
     }
   };
 
@@ -379,28 +403,42 @@ const Chat = () => {
                 {getTranslation(selectedLanguage, "chatWelcome")}
               </h1>
               <div className="max-w-2xl w-full">
-                <div className="relative mb-6 md:mb-8 bg-muted border border-border rounded-3xl p-2 md:p-3 flex items-end shadow-sm focus-within:ring-1 focus-within:ring-primary/50 transition-shadow gap-2">
-                   <textarea
+                
+                {/* WELCOME SCREEN INPUT */}
+                <div className="relative mb-6 md:mb-8 bg-muted border border-border rounded-3xl p-3 md:p-4 flex items-end shadow-sm focus-within:ring-1 focus-within:ring-primary/50 transition-shadow gap-3">
+                  <textarea
                     ref={textareaRef}
                     value={input}
                     onChange={handleTextareaChange}
                     onKeyDown={handleKeyDown}
                     placeholder={getTranslation(selectedLanguage, "chatPlaceholderAsk")}
-                    className="flex-1 bg-transparent outline-none resize-none text-sm md:text-base px-3 py-2 text-foreground max-h-32 overflow-y-auto"
+                    className="flex-1 bg-transparent outline-none resize-none text-sm md:text-base px-2 py-2.5 text-foreground max-h-32 overflow-y-auto w-full"
                     rows={1}
                   />
-                  <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0 pb-1">
-                    <div className="w-24 sm:w-28">
+                  
+                  <div className="flex items-center gap-3 shrink-0">
+                    <div className="w-28 hidden sm:block">
                       <LanguageSelector 
                         selectedLanguage={selectedLanguage} 
                         onLanguageChange={(lang) => setSelectedLanguage(lang as LanguageCode)} 
                         variant="glass"
                       />
                     </div>
-                    <button onClick={toggleRecording} className={`p-2 rounded-full hover:bg-background transition-colors ${isRecording ? "text-destructive animate-pulse" : "text-muted-foreground"}`}>
-                      {isRecording ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+                    
+                    <button 
+                      type="button"
+                      onClick={toggleRecording} 
+                      className={`relative z-10 w-10 h-10 flex items-center justify-center shrink-0 rounded-full transition-all shadow-sm ${
+                        isRecording 
+                          ? "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 animate-pulse ring-2 ring-red-500/50" 
+                          : "bg-background text-foreground border border-border hover:bg-secondary"
+                      }`}
+                      title="Voice to text"
+                    >
+                      {isRecording ? <MicOff className="w-5 h-5 stroke-[2.5]" /> : <Mic className="w-5 h-5 stroke-[2.5]" />}
                     </button>
-                    <Button onClick={() => handleSend()} disabled={!input.trim() || isLoading} variant="hero" size="icon" className="rounded-full w-10 h-10 flex-shrink-0">
+
+                    <Button onClick={() => handleSend()} disabled={!input.trim() || isLoading} variant="default" size="icon" className="rounded-full w-10 h-10 shrink-0 shadow-sm">
                       <Send className="w-4 h-4" />
                     </Button>
                   </div>
@@ -429,7 +467,6 @@ const Chat = () => {
                     {m.role === "user" ? <User className="w-4 h-4 text-secondary" /> : <Bot className="w-4 h-4 text-primary" />}
                   </div>
                   <div className={`max-w-[80%] rounded-2xl px-4 py-3 shadow-sm ${m.role === "user" ? "bg-secondary text-secondary-foreground rounded-br-2xl rounded-tr-sm" : "bg-muted text-foreground rounded-bl-2xl rounded-tl-sm border border-border/50"}`}>
-                    {/* ADDED break-words HERE TO FIX OVERFLOW */}
                     <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{m.content}</p>
                   </div>
                 </div>
@@ -455,28 +492,42 @@ const Chat = () => {
 
         {hasMessages && (
           <div className="p-3 md:p-4 bg-background border-t border-border/30">
-            <div className="max-w-3xl mx-auto flex items-end gap-2 md:gap-3 bg-muted border border-border rounded-3xl px-3 md:px-4 py-2 md:py-3 shadow-sm focus-within:ring-1 focus-within:ring-primary/50 transition-shadow">
+            
+            {/* ACTIVE CHAT INPUT */}
+            <div className="max-w-3xl mx-auto flex items-end gap-3 bg-muted border border-border rounded-3xl px-3 md:px-4 py-2 md:py-3 shadow-sm focus-within:ring-1 focus-within:ring-primary/50 transition-shadow">
               <textarea 
                 ref={textareaRef}
                 value={input} 
                 onChange={handleTextareaChange} 
                 onKeyDown={handleKeyDown} 
-                className="flex-1 bg-transparent outline-none text-sm md:text-base resize-none text-foreground py-2 max-h-32 overflow-y-auto" 
+                className="flex-1 bg-transparent outline-none text-sm md:text-base resize-none text-foreground px-2 py-2.5 max-h-32 overflow-y-auto w-full" 
                 rows={1} 
                 placeholder={getTranslation(selectedLanguage, "chatPlaceholderFollowUp")} 
               />
-              <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0 pb-1">
-                <div className="w-24 sm:w-28">
+              
+              <div className="flex items-center gap-3 shrink-0">
+                <div className="w-28 hidden sm:block">
                   <LanguageSelector 
                     selectedLanguage={selectedLanguage} 
                     onLanguageChange={(lang) => setSelectedLanguage(lang as LanguageCode)} 
                     variant="glass"
                   />
                 </div>
-                <button onClick={toggleRecording} className={`p-2 flex-shrink-0 rounded-full hover:bg-background transition-colors ${isRecording ? "text-destructive animate-pulse" : "text-muted-foreground"}`}>
-                  {isRecording ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+
+                <button 
+                  type="button"
+                  onClick={toggleRecording} 
+                  className={`relative z-10 w-10 h-10 flex items-center justify-center shrink-0 rounded-full transition-all shadow-sm ${
+                    isRecording 
+                      ? "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 animate-pulse ring-2 ring-red-500/50" 
+                      : "bg-background text-foreground border border-border hover:bg-secondary"
+                  }`}
+                  title="Voice to text"
+                >
+                  {isRecording ? <MicOff className="w-5 h-5 stroke-[2.5]" /> : <Mic className="w-5 h-5 stroke-[2.5]" />}
                 </button>
-                <Button onClick={() => handleSend()} disabled={!input.trim() || isLoading} variant="hero" size="icon" className="w-10 h-10 rounded-full flex-shrink-0">
+
+                <Button onClick={() => handleSend()} disabled={!input.trim() || isLoading} variant="default" size="icon" className="w-10 h-10 rounded-full shrink-0 shadow-sm">
                   <Send className="w-4 h-4" />
                 </Button>
               </div>
