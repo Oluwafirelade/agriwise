@@ -62,7 +62,7 @@ export async function getAgriculturalAdvice(
 ): Promise<string> {
   // Auto-detect language if not explicitly set or if English is selected
   // but the text looks like another language
-  const detectedLang = detectLanguage(userQuery);
+  
   const effectiveLang = detectedLang !== "en" ? detectedLang : language;
 
   try {
