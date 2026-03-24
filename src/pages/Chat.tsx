@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import {
   Send, Mic, MicOff, Bot, User, Loader2, Plus,
   Sprout, Leaf, Bug, CloudSun, Menu, ArrowLeft, AlertCircle, MessageSquare,
-  LogIn, LogOut, Trash2, Volume2, VolumeX
+  LogIn, LogOut, Trash2, Volume2, VolumeX, Globe
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LanguageSelector } from "@/components/shared/LanguageSelector";
@@ -61,39 +61,8 @@ const getLanguageCode = (lang: string) => {
   return map[lang] || "en-US";
 };
 
-// --- LANGUAGE AUTO-DETECTOR ---
-const detectLanguage = (text: string): LanguageCode | null => {
-  const lowerText = text.toLowerCase();
-  
-  // 1. Instant match for unique alphabet characters
-  if (/[ẹọṣ]/i.test(lowerText)) return "yo";
-  if (/[ịụñ]/i.test(lowerText)) return "ig";
-  if (/[ƙɓɗƴ]/i.test(lowerText)) return "ha";
-
-  // 2. Score based on common identifying words
-  const yorubaWords = ['bawo', 'kini', 'ese', 'jowo', 'ejo', 'nibo', 'ti', 'ni', 'awon', 'fun', 'eyi', 'agbado', 'ewe', 'ẹgẹ', 'tomati'];
-  const igboWords = ['kedu', 'biko', 'nno', 'daalu', 'olee', 'maka', 'nke', 'na', 'bu', 'akwukwo', 'ugbo', 'akpu', 'unere'];
-  const hausaWords = ['ina', 'yaya', 'sannu', 'godiya', 'don', 'gaskiya', 'kuma', 'wannan', 'cikin', 'da', 'ganyen', 'rogo', 'masara'];
-  const englishWords = ['how', 'what', 'why', 'when', 'the', 'is', 'are', 'you', 'my', 'i', 'to', 'plant', 'soil', 'prevent'];
-
-  const words = lowerText.replace(/[^\w\s]/gi, '').split(/\s+/);
-  let scores = { en: 0, ha: 0, yo: 0, ig: 0 };
-  
-  words.forEach(word => {
-    if (englishWords.includes(word)) scores.en++;
-    if (hausaWords.includes(word)) scores.ha++;
-    if (yorubaWords.includes(word)) scores.yo++;
-    if (igboWords.includes(word)) scores.ig++;
-  });
-
-  const maxScore = Math.max(scores.en, scores.ha, scores.yo, scores.ig);
-  if (maxScore === 0) return null; // Not enough data to guess
-  
-  if (maxScore === scores.yo) return 'yo';
-  if (maxScore === scores.ig) return 'ig';
-  if (maxScore === scores.ha) return 'ha';
-  return 'en';
-};
+// Replace with your actual backend URL if it's hosted elsewhere
+const API_BASE_URL = ""; 
 
 const Chat = () => {
   const navigate = useNavigate();
@@ -124,7 +93,6 @@ const Chat = () => {
   const [selectedLanguage, setSelectedLanguage] = useState<LanguageCode>("en");
   
   const [speakingId, setSpeakingId] = useState<string | null>(null);
-  
   const [sidebarOpen, setSidebarOpen] = useState(
     typeof window !== "undefined" ? window.innerWidth >= 1024 : false
   );
@@ -133,6 +101,7 @@ const Chat = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const currentSession = sessions.find(s => s.id === currentSessionId);
   const messages = currentSession?.messages || [];
@@ -142,49 +111,74 @@ const Chat = () => {
     localStorage.setItem("agriadvisor_sessions", JSON.stringify(sessions));
   }, [sessions]);
 
+  // Cleanup audio on unmount
   useEffect(() => {
     return () => {
-      if (window.speechSynthesis) {
-        window.speechSynthesis.cancel();
+      if (audioRef.current) {
+        audioRef.current.pause();
       }
     };
   }, []);
 
-  const toggleSpeech = (text: string, messageId: string) => {
-    if (!window.speechSynthesis) {
-      setApiError("Text-to-speech is not supported in this browser.");
-      return;
-    }
-
+  // --- CHARLIE'S ASSIGNMENT: STEP 4 (Updated TTS Handler) ---
+  const generateAndPlayTTS = async (messageContent: string, messageId: string) => {
+    // If clicking the currently playing message, stop it
     if (speakingId === messageId) {
-      window.speechSynthesis.cancel();
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
       setSpeakingId(null);
       return;
     }
 
-    window.speechSynthesis.cancel();
-
-    const utterance = new SpeechSynthesisUtterance(text);
-    const targetLang = getLanguageCode(selectedLanguage);
-    utterance.lang = targetLang;
-    
-    // Attempt to force the browser to use a matching native voice pack if available
-    const availableVoices = window.speechSynthesis.getVoices();
-    const nativeVoice = availableVoices.find(
-      (voice) => voice.lang === targetLang || voice.lang.startsWith(selectedLanguage)
-    );
-    
-    if (nativeVoice) {
-      utterance.voice = nativeVoice;
+    // Stop any existing audio
+    if (audioRef.current) {
+      audioRef.current.pause();
     }
 
-    utterance.rate = 0.90; 
-
-    utterance.onend = () => setSpeakingId(null);
-    utterance.onerror = () => setSpeakingId(null);
-
     setSpeakingId(messageId);
-    window.speechSynthesis.speak(utterance);
+    setApiError(null);
+
+    try {
+      // Calls the backend explicitly for audio data
+      const response = await fetch(`${API_BASE_URL}/api/agricultural-advice`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          query: messageContent,
+          language: "auto",  // Always auto-detect per Charlie's instructions
+          tts: true,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch audio");
+      }
+
+      const data = await response.json();
+
+      if (data.audio_base64) {
+        const audio = new Audio(`data:audio/mp3;base64,${data.audio_base64}`);
+        audioRef.current = audio;
+        
+        audio.onended = () => setSpeakingId(null);
+        audio.onerror = () => {
+          setApiError("Error playing audio.");
+          setSpeakingId(null);
+        };
+        
+        audio.play();
+      } else {
+        throw new Error("No audio returned from server");
+      }
+    } catch (error) {
+      console.error("TTS Error:", error);
+      setApiError("I couldn't generate the audio. Please check your connection.");
+      setSpeakingId(null);
+    }
   };
 
   const toggleRecording = () => {
@@ -209,7 +203,9 @@ const Chat = () => {
 
     recognition.onstart = () => {
       setIsRecording(true);
-      window.speechSynthesis.cancel();
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
       setSpeakingId(null);
     };
 
@@ -217,12 +213,6 @@ const Chat = () => {
       const transcript = event.results[0][0].transcript;
       const newText = input ? `${input} ${transcript}` : transcript;
       setInput(newText);
-      
-      // Auto-detect language after voice transcription finishes
-      const detected = detectLanguage(newText);
-      if (detected && detected !== selectedLanguage) {
-        setSelectedLanguage(detected);
-      }
       
       if (textareaRef.current) {
         textareaRef.current.style.height = 'auto';
@@ -275,15 +265,7 @@ const Chat = () => {
   };
 
   const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const val = e.target.value;
-    setInput(val);
-    
-    // Auto-detect language as the user is typing
-    const detected = detectLanguage(val);
-    if (detected && detected !== selectedLanguage) {
-      setSelectedLanguage(detected);
-    }
-
+    setInput(e.target.value);
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
       textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
@@ -294,7 +276,9 @@ const Chat = () => {
     const messageText = text || input.trim();
     if (!messageText || isLoading) return;
 
-    window.speechSynthesis.cancel();
+    if (audioRef.current) {
+      audioRef.current.pause();
+    }
     setSpeakingId(null);
 
     let targetSessionId = currentSessionId;
@@ -338,7 +322,9 @@ const Chat = () => {
     }
 
     try {
-      const aiResponse = await getAgriculturalAdvice(messageText, selectedLanguage);
+      // --- CHARLIE'S ASSIGNMENT: STEP 3 (Update Message Handler) ---
+      const result = await getAgriculturalAdvice(messageText, "auto", false);
+      const aiResponse = result.response;
       
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -453,12 +439,24 @@ const Chat = () => {
           )}
         </div>
 
-        {/* --- LANGUAGE TOGGLE IN SIDEBAR FOOTER --- */}
-        <div className="p-4 border-t border-border/50 bg-background/50 backdrop-blur-sm">
-          <LanguageSelector 
-            selectedLanguage={selectedLanguage} 
-            onLanguageChange={(lang) => setSelectedLanguage(lang as LanguageCode)} 
-          />
+        {/* --- CHARLIE'S ASSIGNMENT: STEP 2 (Hide Toggle by Default) --- */}
+        <div className="p-3 border-t border-border/50 bg-background">
+          <details className="group">
+            <summary className="cursor-pointer text-xs font-semibold text-muted-foreground hover:text-foreground px-3 py-2 rounded-lg hover:bg-muted transition-colors flex items-center gap-2">
+              <span>⚙️ UI Language</span>
+              <span className="text-muted-foreground group-open:rotate-180 transition-transform">▼</span>
+            </summary>
+            <div className="mt-2 px-2">
+              <LanguageSelector 
+                selectedLanguage={selectedLanguage} 
+                onLanguageChange={(lang) => setSelectedLanguage(lang as LanguageCode)} 
+                variant="glass"
+              />
+              <p className="text-xs text-muted-foreground mt-2 px-2 italic">
+                Queries auto-detect your input language
+              </p>
+            </div>
+          </details>
         </div>
       </aside>
 
@@ -542,7 +540,7 @@ const Chat = () => {
                       {isRecording ? <MicOff className="w-5 h-5 stroke-[2.5]" /> : <Mic className="w-5 h-5 stroke-[2.5]" />}
                     </button>
 
-                    <Button onClick={() => handleSend()} disabled={!input.trim() || isLoading} variant="default" size="icon" className="rounded-full w-10 h-10 shrink-0 shadow-sm">
+                    <Button onClick={() => handleSend()} disabled={!input.trim() || isLoading} variant="default" size="icon" className="w-10 h-10 rounded-full shrink-0 shadow-sm">
                       <Send className="w-4 h-4" />
                     </Button>
                   </div>
@@ -580,7 +578,7 @@ const Chat = () => {
                     {/* TRANSLATED READ ALOUD BUTTON FOR AI MESSAGES */}
                     {m.role === "assistant" && (
                       <button 
-                        onClick={() => toggleSpeech(m.content, m.id)}
+                        onClick={() => generateAndPlayTTS(m.content, m.id)}
                         className={`flex items-center gap-1.5 text-xs font-medium px-2 py-1 rounded-full transition-colors ${
                           speakingId === m.id 
                             ? "text-primary bg-primary/10 animate-pulse" 

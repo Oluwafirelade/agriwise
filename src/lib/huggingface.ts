@@ -6,29 +6,54 @@
 const API_BASE_URL = "https://mrcahrles00-agriwise-backend.hf.space";
 
 export async function getAgriculturalAdvice(
-  userQuery: string, 
-  language: string
-): Promise<string> {
+  userQuery: string,
+  language: string,
+  tts: boolean = false
+): Promise<{ response: string; audio_base64?: string; language: string }> {
+  // ALWAYS use "auto" for backend — let it auto-detect user's language
+  // selectedLanguage is ONLY for UI language, not for query translation
+  const effectiveLang = "auto";
+
   try {
     const response = await fetch(`${API_BASE_URL}/api/agricultural-advice`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({
         query: userQuery,
-        language: language, // We still send this as a "hint"
+        language: effectiveLang,  // ← Always "auto"
+        tts: tts,
       }),
     });
 
-    if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
+    if (!response.ok) {
+      throw new Error(`API Error: ${response.statusText}`);
+    }
 
     const data = await response.json();
-    return data.response || "No response received.";
+
+    if (data.response) {
+      return {
+        response: data.response,
+        audio_base64: data.audio_base64,
+        language: data.language || "auto",
+      };
+    }
+
+    if (data.error) {
+      throw new Error(data.error);
+    }
+
+    throw new Error("No response from API");
   } catch (error) {
     console.error("Agricultural Advice Error:", error);
-    return "Sorry, I am having trouble connecting to the advisor. Please try again shortly.";
+    return {
+      response: getFallbackResponse(userQuery, "auto"),
+      language: "auto",
+    };
   }
 }
-
 
 /**
  * Fallback response when API fails
