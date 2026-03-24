@@ -51,7 +51,6 @@ const suggestionCards = [
   },
 ];
 
-// --- LOCALIZED UI LABELS ---
 const uiLabels = {
   readAloud: { en: "Read aloud", ha: "Karanta a fili", yo: "Ka soke", ig: "Gụọ ya n'olu" },
   stopReading: { en: "Stop reading", ha: "Daina karantawa", yo: "Duro kika", ig: "Kwụsị ịgụ" },
@@ -63,7 +62,6 @@ const getLanguageCode = (lang: string) => {
   return map[lang] || "en-US";
 };
 
-// --- LANGUAGE AUTO-DETECTOR (EXPANDED & UNICODE FIXED) ---
 const detectLanguage = (text: string): LanguageCode | null => {
   const lowerText = text.toLowerCase();
   
@@ -168,7 +166,6 @@ const Chat = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
 
   const currentSession = sessions.find(s => s.id === currentSessionId);
@@ -179,10 +176,11 @@ const Chat = () => {
     localStorage.setItem("agriadvisor_sessions", JSON.stringify(sessions));
   }, [sessions]);
 
+  // Clean up speech synthesis on component unmount
   useEffect(() => {
     return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
       }
     };
   }, []);
@@ -195,44 +193,46 @@ const Chat = () => {
     setIsLoading(false);
   };
 
-  const generateAndPlayTTS = async (messageContent: string, messageId: string) => {
+  // --- NATIVE BROWSER TTS IMPLEMENTATION ---
+  const generateAndPlayTTS = (messageContent: string, messageId: string) => {
+    if (!('speechSynthesis' in window)) {
+      setApiError("Text-to-speech is not supported in this browser.");
+      return;
+    }
+
+    // If already speaking THIS message, pause/stop it
     if (speakingId === messageId) {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.currentTime = 0;
-      }
+      window.speechSynthesis.cancel();
       setSpeakingId(null);
       return;
     }
 
-    if (audioRef.current) {
-      audioRef.current.pause();
-    }
-
+    // Cancel any current speech before starting a new one
+    window.speechSynthesis.cancel();
     setSpeakingId(messageId);
     setApiError(null);
 
     try {
-      const result = await getAgriculturalAdvice(messageContent, "auto", true);
-
-      if (result.audio_base64) {
-        const audio = new Audio(`data:audio/mp3;base64,${result.audio_base64}`);
-        audioRef.current = audio;
-        
-        audio.onended = () => setSpeakingId(null);
-        audio.onerror = () => {
+      const utterance = new SpeechSynthesisUtterance(messageContent);
+      utterance.lang = getLanguageCode(selectedLanguage);
+      
+      utterance.onend = () => {
+        setSpeakingId(null);
+      };
+      
+      utterance.onerror = (event) => {
+        // Ignore the error if it was manually canceled by the user
+        if (event.error !== 'canceled') {
+          console.error("TTS Error:", event);
           setApiError("Error playing audio.");
-          setSpeakingId(null);
-        };
-        
-        audio.play();
-      } else {
-        throw new Error("No audio returned from server");
-      }
-    } catch (error: any) {
-      if (error.name === 'AbortError') return;
+        }
+        setSpeakingId(null);
+      };
+
+      window.speechSynthesis.speak(utterance);
+    } catch (error) {
       console.error("TTS Error:", error);
-      setApiError("I couldn't generate the audio. Please check your connection.");
+      setApiError("I couldn't generate the audio. Please check your browser settings.");
       setSpeakingId(null);
     }
   };
@@ -259,8 +259,8 @@ const Chat = () => {
 
     recognition.onstart = () => {
       setIsRecording(true);
-      if (audioRef.current) {
-        audioRef.current.pause();
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
       }
       setSpeakingId(null);
     };
@@ -348,8 +348,8 @@ const Chat = () => {
     const messageText = text || input.trim();
     if (!messageText || isLoading) return;
 
-    if (audioRef.current) {
-      audioRef.current.pause();
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
     }
     setSpeakingId(null);
 
@@ -397,6 +397,8 @@ const Chat = () => {
     abortControllerRef.current = controller;
 
     try {
+      // NOTE: Removed `true` parameter to stop forcing backend audio generation 
+      // since we're using native browser TTS now.
       const result = await getAgriculturalAdvice(messageText, "auto", false, controller.signal);
       const aiResponse = result.response;
       
