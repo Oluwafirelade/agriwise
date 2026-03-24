@@ -51,7 +51,6 @@ const suggestionCards = [
   },
 ];
 
-// Inline translations for the Text-to-Speech buttons
 const ttsLabels = {
   readAloud: { en: "Read aloud", ha: "Karanta a fili", yo: "Ka soke", ig: "Gụọ ya n'olu" },
   stopReading: { en: "Stop reading", ha: "Daina karantawa", yo: "Duro kika", ig: "Kwụsị ịgụ" }
@@ -60,6 +59,40 @@ const ttsLabels = {
 const getLanguageCode = (lang: string) => {
   const map: Record<string, string> = { en: "en-US", ha: "ha-NG", yo: "yo-NG", ig: "ig-NG" };
   return map[lang] || "en-US";
+};
+
+// --- LANGUAGE AUTO-DETECTOR ---
+const detectLanguage = (text: string): LanguageCode | null => {
+  const lowerText = text.toLowerCase();
+  
+  // 1. Instant match for unique alphabet characters
+  if (/[ẹọṣ]/i.test(lowerText)) return "yo";
+  if (/[ịụñ]/i.test(lowerText)) return "ig";
+  if (/[ƙɓɗƴ]/i.test(lowerText)) return "ha";
+
+  // 2. Score based on common identifying words
+  const yorubaWords = ['bawo', 'kini', 'ese', 'jowo', 'ejo', 'nibo', 'ti', 'ni', 'awon', 'fun', 'eyi', 'agbado', 'ewe', 'ẹgẹ', 'tomati'];
+  const igboWords = ['kedu', 'biko', 'nno', 'daalu', 'olee', 'maka', 'nke', 'na', 'bu', 'akwukwo', 'ugbo', 'akpu', 'unere'];
+  const hausaWords = ['ina', 'yaya', 'sannu', 'godiya', 'don', 'gaskiya', 'kuma', 'wannan', 'cikin', 'da', 'ganyen', 'rogo', 'masara'];
+  const englishWords = ['how', 'what', 'why', 'when', 'the', 'is', 'are', 'you', 'my', 'i', 'to', 'plant', 'soil', 'prevent'];
+
+  const words = lowerText.replace(/[^\w\s]/gi, '').split(/\s+/);
+  let scores = { en: 0, ha: 0, yo: 0, ig: 0 };
+  
+  words.forEach(word => {
+    if (englishWords.includes(word)) scores.en++;
+    if (hausaWords.includes(word)) scores.ha++;
+    if (yorubaWords.includes(word)) scores.yo++;
+    if (igboWords.includes(word)) scores.ig++;
+  });
+
+  const maxScore = Math.max(scores.en, scores.ha, scores.yo, scores.ig);
+  if (maxScore === 0) return null; // Not enough data to guess
+  
+  if (maxScore === scores.yo) return 'yo';
+  if (maxScore === scores.ig) return 'ig';
+  if (maxScore === scores.ha) return 'ha';
+  return 'en';
 };
 
 const Chat = () => {
@@ -132,10 +165,20 @@ const Chat = () => {
     window.speechSynthesis.cancel();
 
     const utterance = new SpeechSynthesisUtterance(text);
+    const targetLang = getLanguageCode(selectedLanguage);
+    utterance.lang = targetLang;
     
-    // This connects the browser's voice engine to the currently selected language
-    utterance.lang = getLanguageCode(selectedLanguage);
-    utterance.rate = 0.95; 
+    // Attempt to force the browser to use a matching native voice pack if available
+    const availableVoices = window.speechSynthesis.getVoices();
+    const nativeVoice = availableVoices.find(
+      (voice) => voice.lang === targetLang || voice.lang.startsWith(selectedLanguage)
+    );
+    
+    if (nativeVoice) {
+      utterance.voice = nativeVoice;
+    }
+
+    utterance.rate = 0.90; 
 
     utterance.onend = () => setSpeakingId(null);
     utterance.onerror = () => setSpeakingId(null);
@@ -162,8 +205,6 @@ const Chat = () => {
     const recognition = new SpeechRecognition();
     recognition.continuous = false;
     recognition.interimResults = false;
-    
-    // This connects the browser's microphone engine to the currently selected language
     recognition.lang = getLanguageCode(selectedLanguage);
 
     recognition.onstart = () => {
@@ -174,7 +215,14 @@ const Chat = () => {
 
     recognition.onresult = (event: any) => {
       const transcript = event.results[0][0].transcript;
-      setInput((prev) => (prev ? `${prev} ${transcript}` : transcript));
+      const newText = input ? `${input} ${transcript}` : transcript;
+      setInput(newText);
+      
+      // Auto-detect language after voice transcription finishes
+      const detected = detectLanguage(newText);
+      if (detected && detected !== selectedLanguage) {
+        setSelectedLanguage(detected);
+      }
       
       if (textareaRef.current) {
         textareaRef.current.style.height = 'auto';
@@ -227,7 +275,15 @@ const Chat = () => {
   };
 
   const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setInput(e.target.value);
+    const val = e.target.value;
+    setInput(val);
+    
+    // Auto-detect language as the user is typing
+    const detected = detectLanguage(val);
+    if (detected && detected !== selectedLanguage) {
+      setSelectedLanguage(detected);
+    }
+
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
       textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
