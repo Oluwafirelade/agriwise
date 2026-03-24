@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import {
   Send, Mic, MicOff, Bot, User, Loader2, Plus,
   Sprout, Leaf, Bug, CloudSun, Menu, ArrowLeft, AlertCircle, MessageSquare,
-  LogIn, LogOut, Trash2, Volume2, VolumeX, Globe
+  LogIn, LogOut, Trash2, Volume2, VolumeX, Square
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LanguageSelector } from "@/components/shared/LanguageSelector";
@@ -51,9 +51,11 @@ const suggestionCards = [
   },
 ];
 
-const ttsLabels = {
+// --- LOCALIZED UI LABELS ---
+const uiLabels = {
   readAloud: { en: "Read aloud", ha: "Karanta a fili", yo: "Ka soke", ig: "Gụọ ya n'olu" },
-  stopReading: { en: "Stop reading", ha: "Daina karantawa", yo: "Duro kika", ig: "Kwụsị ịgụ" }
+  stopReading: { en: "Stop reading", ha: "Daina karantawa", yo: "Duro kika", ig: "Kwụsị ịgụ" },
+  stopGenerating: { en: "Stop generating", ha: "Dakatar", yo: "Dáwọ́ dúró", ig: "Kwụsị" }
 };
 
 const getLanguageCode = (lang: string) => {
@@ -61,8 +63,71 @@ const getLanguageCode = (lang: string) => {
   return map[lang] || "en-US";
 };
 
-// Replace with your actual backend URL if it's hosted elsewhere
-const API_BASE_URL = ""; 
+// --- LANGUAGE AUTO-DETECTOR (EXPANDED & UNICODE FIXED) ---
+const detectLanguage = (text: string): LanguageCode | null => {
+  const lowerText = text.toLowerCase();
+  
+  if (/[ẹọṣ]/i.test(lowerText)) return "yo";
+  if (/[ịụñ]/i.test(lowerText)) return "ig";
+  if (/[ƙɓɗƴ]/i.test(lowerText)) return "ha";
+
+  const yorubaWords = [
+    'bawo', 'kini', 'ese', 'jowo', 'ejo', 'nibo', 'ti', 'ni', 'awon', 'fun', 'eyi', 
+    'agbado', 'ewe', 'ẹgẹ', 'ege', 'tomati', 'oko', 'omi', 'ile', 'ilẹ', 'irugbin', 
+    'ajile', 'kokoro', 'arun', 'ojo', 'gbin', 'ogede', 'ọgẹdẹ', 'isu', 'iṣu', 'mo', 
+    'o', 'a', 'won', 'wa', 'lo', 'se', 'pe', 'bi', 'ko', 'ki', 'igi', 'eruku', 
+    'oorun', 'ikore', 'ewekọ', 'ewa', 'iresi', 'ata', 'alubosa', 'eja', 'eran', 
+    'maluu', 'ewure', 'adie', 'gbingbin', 'tutu', 'gbigbe', 'rirun'
+  ];
+
+  const igboWords = [
+    'kedu', 'biko', 'nno', 'daalu', 'olee', 'maka', 'nke', 'na', 'bu', 'akwukwo', 
+    'akwụkwọ', 'ugbo', 'akpu', 'akpụ', 'unere', 'ala', 'mmiri', 'osisi', 'ahuhu', 
+    'ahụhụ', 'oria', 'ọrịa', 'ozuzo', 'iku', 'ịkụ', 'ji', 'oka', 'ọka', 'm', 'i', 
+    'ha', 'di', 'ga', 'bia', 'mee', 'ya', 'anwu', 'ifufe', 'aja', 'mkpuru', 
+    'iwewe', 'ahia', 'ede', 'agwa', 'osikapa', 'ose', 'yabasi', 'yabasị', 'azu', 
+    'anu', 'ehi', 'ewu', 'okuko', 'okochi', 'ọkọchị', 'udu'
+  ];
+
+  const hausaWords = [
+    'ina', 'yaya', 'sannu', 'godiya', 'don', 'gaskiya', 'kuma', 'wannan', 'cikin', 
+    'da', 'ganyen', 'rogo', 'masara', 'kasa', 'ruwa', 'shuka', 'taki', 'kwari', 
+    'cuta', 'sama', 'doya', 'tumatur', 'dasa', 'noma', 'amfanin', 'na', 'ka', 'ki', 
+    'ya', 'ta', 'su', 'muna', 'suna', 'ne', 'ce', 'ba', 'yi', 'zo', 'tafi', 
+    'yadda', 'me', 'rana', 'iska', 'zafi', 'sanyi', 'girbi', 'kasuwa', 'wake', 
+    'shinkafa', 'barkono', 'albasa', 'kifi', 'nama', 'saniya', 'akuya', 'kaza', 
+    'rani', 'damina', 'iri', 'gona'
+  ];
+
+  const englishWords = [
+    'how', 'what', 'why', 'when', 'the', 'is', 'are', 'you', 'my', 'i', 'to', 
+    'plant', 'soil', 'prevent', 'farm', 'crop', 'fertilizer', 'water', 'rain', 
+    'harvest', 'pest', 'disease', 'cassava', 'maize', 'yam', 'leaf', 'leaves', 
+    'yellow', 'seed', 'grow', 'it', 'this', 'that', 'have', 'do', 'for', 'with', 
+    'on', 'at', 'by', 'from', 'an', 'be', 'can', 'will', 'your', 'we', 'they', 
+    'not', 'no', 'tree', 'sun', 'wind', 'market', 'beans', 'rice', 'pepper', 
+    'onion', 'fish', 'meat', 'cow', 'goat', 'chicken', 'dry', 'season', 'wet', 
+    'weather', 'climate', 'yield', 'weed', 'bug'
+  ];
+
+  const words = lowerText.replace(/[^\p{L}\s]/gu, '').split(/\s+/);
+  let scores = { en: 0, ha: 0, yo: 0, ig: 0 };
+  
+  words.forEach(word => {
+    if (englishWords.includes(word)) scores.en++;
+    if (hausaWords.includes(word)) scores.ha++;
+    if (yorubaWords.includes(word)) scores.yo++;
+    if (igboWords.includes(word)) scores.ig++;
+  });
+
+  const maxScore = Math.max(scores.en, scores.ha, scores.yo, scores.ig);
+  if (maxScore === 0) return null; 
+  
+  if (maxScore === scores.yo) return 'yo';
+  if (maxScore === scores.ig) return 'ig';
+  if (maxScore === scores.ha) return 'ha';
+  return 'en';
+};
 
 const Chat = () => {
   const navigate = useNavigate();
@@ -92,7 +157,9 @@ const Chat = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState<LanguageCode>("en");
   
+  const [isAutoDetect, setIsAutoDetect] = useState(true);
   const [speakingId, setSpeakingId] = useState<string | null>(null);
+  
   const [sidebarOpen, setSidebarOpen] = useState(
     typeof window !== "undefined" ? window.innerWidth >= 1024 : false
   );
@@ -102,6 +169,7 @@ const Chat = () => {
   const recognitionRef = useRef<any>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const currentSession = sessions.find(s => s.id === currentSessionId);
   const messages = currentSession?.messages || [];
@@ -111,7 +179,6 @@ const Chat = () => {
     localStorage.setItem("agriadvisor_sessions", JSON.stringify(sessions));
   }, [sessions]);
 
-  // Cleanup audio on unmount
   useEffect(() => {
     return () => {
       if (audioRef.current) {
@@ -120,9 +187,15 @@ const Chat = () => {
     };
   }, []);
 
-  // --- CHARLIE'S ASSIGNMENT: STEP 4 (Updated TTS Handler) ---
+  const stopGenerating = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+    setIsLoading(false);
+  };
+
   const generateAndPlayTTS = async (messageContent: string, messageId: string) => {
-    // If clicking the currently playing message, stop it
     if (speakingId === messageId) {
       if (audioRef.current) {
         audioRef.current.pause();
@@ -132,7 +205,6 @@ const Chat = () => {
       return;
     }
 
-    // Stop any existing audio
     if (audioRef.current) {
       audioRef.current.pause();
     }
@@ -141,27 +213,10 @@ const Chat = () => {
     setApiError(null);
 
     try {
-      // Calls the backend explicitly for audio data
-      const response = await fetch(`${API_BASE_URL}/api/agricultural-advice`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          query: messageContent,
-          language: "auto",  // Always auto-detect per Charlie's instructions
-          tts: true,
-        }),
-      });
+      const result = await getAgriculturalAdvice(messageContent, "auto", true);
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch audio");
-      }
-
-      const data = await response.json();
-
-      if (data.audio_base64) {
-        const audio = new Audio(`data:audio/mp3;base64,${data.audio_base64}`);
+      if (result.audio_base64) {
+        const audio = new Audio(`data:audio/mp3;base64,${result.audio_base64}`);
         audioRef.current = audio;
         
         audio.onended = () => setSpeakingId(null);
@@ -174,7 +229,8 @@ const Chat = () => {
       } else {
         throw new Error("No audio returned from server");
       }
-    } catch (error) {
+    } catch (error: any) {
+      if (error.name === 'AbortError') return;
       console.error("TTS Error:", error);
       setApiError("I couldn't generate the audio. Please check your connection.");
       setSpeakingId(null);
@@ -213,6 +269,13 @@ const Chat = () => {
       const transcript = event.results[0][0].transcript;
       const newText = input ? `${input} ${transcript}` : transcript;
       setInput(newText);
+      
+      if (isAutoDetect) {
+        const detected = detectLanguage(newText);
+        if (detected && detected !== selectedLanguage) {
+          setSelectedLanguage(detected);
+        }
+      }
       
       if (textareaRef.current) {
         textareaRef.current.style.height = 'auto';
@@ -265,7 +328,16 @@ const Chat = () => {
   };
 
   const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setInput(e.target.value);
+    const val = e.target.value;
+    setInput(val);
+    
+    if (isAutoDetect) {
+      const detected = detectLanguage(val);
+      if (detected && detected !== selectedLanguage) {
+        setSelectedLanguage(detected);
+      }
+    }
+
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
       textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
@@ -321,9 +393,11 @@ const Chat = () => {
       textareaRef.current.style.height = 'auto';
     }
 
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
     try {
-      // --- CHARLIE'S ASSIGNMENT: STEP 3 (Update Message Handler) ---
-      const result = await getAgriculturalAdvice(messageText, "auto", false);
+      const result = await getAgriculturalAdvice(messageText, "auto", false, controller.signal);
       const aiResponse = result.response;
       
       const aiMessage: Message = {
@@ -339,10 +413,15 @@ const Chat = () => {
           : s
       ));
 
-    } catch (error) {
+    } catch (error: any) {
+      if (error.name === 'AbortError') {
+        console.log("Request aborted by user");
+        return; 
+      }
       setApiError("I couldn't reach the advisor. Please check your connection.");
     } finally {
       setIsLoading(false);
+      abortControllerRef.current = null;
     }
   };
 
@@ -439,24 +518,30 @@ const Chat = () => {
           )}
         </div>
 
-        {/* --- CHARLIE'S ASSIGNMENT: STEP 2 (Hide Toggle by Default) --- */}
-        <div className="p-3 border-t border-border/50 bg-background">
-          <details className="group">
-            <summary className="cursor-pointer text-xs font-semibold text-muted-foreground hover:text-foreground px-3 py-2 rounded-lg hover:bg-muted transition-colors flex items-center gap-2">
-              <span>⚙️ UI Language</span>
-              <span className="text-muted-foreground group-open:rotate-180 transition-transform">▼</span>
-            </summary>
-            <div className="mt-2 px-2">
-              <LanguageSelector 
-                selectedLanguage={selectedLanguage} 
-                onLanguageChange={(lang) => setSelectedLanguage(lang as LanguageCode)} 
-                variant="glass"
+        {/* --- LANGUAGE TOGGLE & AUTO-DETECT SWITCH IN SIDEBAR FOOTER --- */}
+        <div className="p-4 border-t border-border/50 bg-background/50 backdrop-blur-sm space-y-3">
+          <div className="flex items-center justify-between px-1">
+            <span className="text-xs font-medium text-muted-foreground">
+              Auto-detect language
+            </span>
+            <button
+              onClick={() => setIsAutoDetect(!isAutoDetect)}
+              className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background ${
+                isAutoDetect ? 'bg-primary' : 'bg-muted-foreground/40'
+              }`}
+              title="Toggle automatic language detection"
+            >
+              <span 
+                className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${
+                  isAutoDetect ? 'translate-x-4' : 'translate-x-1'
+                }`} 
               />
-              <p className="text-xs text-muted-foreground mt-2 px-2 italic">
-                Queries auto-detect your input language
-              </p>
-            </div>
-          </details>
+            </button>
+          </div>
+          <LanguageSelector 
+            selectedLanguage={selectedLanguage} 
+            onLanguageChange={(lang) => setSelectedLanguage(lang as LanguageCode)} 
+          />
         </div>
       </aside>
 
@@ -588,12 +673,12 @@ const Chat = () => {
                         {speakingId === m.id ? (
                           <>
                             <VolumeX className="w-3.5 h-3.5" /> 
-                            {ttsLabels.stopReading[selectedLanguage as keyof typeof ttsLabels.stopReading] || ttsLabels.stopReading.en}
+                            {uiLabels.stopReading[selectedLanguage as keyof typeof uiLabels.stopReading] || uiLabels.stopReading.en}
                           </>
                         ) : (
                           <>
                             <Volume2 className="w-3.5 h-3.5" /> 
-                            {ttsLabels.readAloud[selectedLanguage as keyof typeof ttsLabels.readAloud] || ttsLabels.readAloud.en}
+                            {uiLabels.readAloud[selectedLanguage as keyof typeof uiLabels.readAloud] || uiLabels.readAloud.en}
                           </>
                         )}
                       </button>
@@ -604,16 +689,27 @@ const Chat = () => {
               ))}
 
               {isLoading && (
-                <div className="flex gap-3">
-                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                    <Bot className="w-4 h-4 text-primary" />
-                  </div>
-                  <div className="bg-muted rounded-2xl rounded-bl-2xl rounded-tl-sm border border-border/50 px-4 py-3">
-                    <div className="flex items-center gap-2">
-                      <Loader2 className="w-4 h-4 animate-spin text-primary" />
-                      <span className="text-sm text-muted-foreground">{getTranslation(selectedLanguage, "chatThinking")}</span>
+                <div className="flex flex-col gap-2 items-start">
+                  <div className="flex gap-3">
+                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Bot className="w-4 h-4 text-primary" />
+                    </div>
+                    <div className="bg-muted rounded-2xl rounded-bl-2xl rounded-tl-sm border border-border/50 px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                        <span className="text-sm text-muted-foreground">{getTranslation(selectedLanguage, "chatThinking")}</span>
+                      </div>
                     </div>
                   </div>
+                  
+                  {/* TRANSLATED STOP GENERATING BUTTON */}
+                  <button
+                    onClick={stopGenerating}
+                    className="ml-11 flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground bg-muted hover:bg-muted/80 px-3 py-1.5 rounded-full transition-colors border border-border/50"
+                  >
+                    <Square className="w-3 h-3 fill-current" /> 
+                    {uiLabels.stopGenerating[selectedLanguage as keyof typeof uiLabels.stopGenerating] || uiLabels.stopGenerating.en}
+                  </button>
                 </div>
               )}
               {apiError && <div className="text-destructive text-xs flex items-center gap-1 justify-center bg-destructive/10 p-2 rounded-lg"><AlertCircle className="w-3 h-3" />{apiError}</div>}
