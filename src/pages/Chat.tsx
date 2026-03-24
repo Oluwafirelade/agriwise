@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import {
   Send, Mic, MicOff, Bot, User, Loader2, Plus,
   Sprout, Leaf, Bug, CloudSun, Menu, ArrowLeft, AlertCircle, MessageSquare,
-  LogIn, LogOut, Trash2
+  LogIn, LogOut, Trash2, Volume2, VolumeX
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LanguageSelector } from "@/components/shared/LanguageSelector";
@@ -51,6 +51,12 @@ const suggestionCards = [
   },
 ];
 
+// Inline translations for the Text-to-Speech buttons
+const ttsLabels = {
+  readAloud: { en: "Read aloud", ha: "Karanta a fili", yo: "Ka soke", ig: "Gụọ ya n'olu" },
+  stopReading: { en: "Stop reading", ha: "Daina karantawa", yo: "Duro kika", ig: "Kwụsị ịgụ" }
+};
+
 const getLanguageCode = (lang: string) => {
   const map: Record<string, string> = { en: "en-US", ha: "ha-NG", yo: "yo-NG", ig: "ig-NG" };
   return map[lang] || "en-US";
@@ -84,6 +90,8 @@ const Chat = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState<LanguageCode>("en");
   
+  const [speakingId, setSpeakingId] = useState<string | null>(null);
+  
   const [sidebarOpen, setSidebarOpen] = useState(
     typeof window !== "undefined" ? window.innerWidth >= 1024 : false
   );
@@ -101,7 +109,41 @@ const Chat = () => {
     localStorage.setItem("agriadvisor_sessions", JSON.stringify(sessions));
   }, [sessions]);
 
-  // Handle Speech Recognition securely inside the toggle function
+  useEffect(() => {
+    return () => {
+      if (window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, []);
+
+  const toggleSpeech = (text: string, messageId: string) => {
+    if (!window.speechSynthesis) {
+      setApiError("Text-to-speech is not supported in this browser.");
+      return;
+    }
+
+    if (speakingId === messageId) {
+      window.speechSynthesis.cancel();
+      setSpeakingId(null);
+      return;
+    }
+
+    window.speechSynthesis.cancel();
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    
+    // This connects the browser's voice engine to the currently selected language
+    utterance.lang = getLanguageCode(selectedLanguage);
+    utterance.rate = 0.95; 
+
+    utterance.onend = () => setSpeakingId(null);
+    utterance.onerror = () => setSpeakingId(null);
+
+    setSpeakingId(messageId);
+    window.speechSynthesis.speak(utterance);
+  };
+
   const toggleRecording = () => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     
@@ -120,10 +162,14 @@ const Chat = () => {
     const recognition = new SpeechRecognition();
     recognition.continuous = false;
     recognition.interimResults = false;
+    
+    // This connects the browser's microphone engine to the currently selected language
     recognition.lang = getLanguageCode(selectedLanguage);
 
     recognition.onstart = () => {
       setIsRecording(true);
+      window.speechSynthesis.cancel();
+      setSpeakingId(null);
     };
 
     recognition.onresult = (event: any) => {
@@ -145,9 +191,7 @@ const Chat = () => {
       }
     };
 
-    recognition.onend = () => {
-      setIsRecording(false);
-    };
+    recognition.onend = () => setIsRecording(false);
 
     recognitionRef.current = recognition;
     try {
@@ -193,6 +237,9 @@ const Chat = () => {
   const handleSend = async (text?: string) => {
     const messageText = text || input.trim();
     if (!messageText || isLoading) return;
+
+    window.speechSynthesis.cancel();
+    setSpeakingId(null);
 
     let targetSessionId = currentSessionId;
     let isNewSession = false;
@@ -249,6 +296,7 @@ const Chat = () => {
           ? { ...s, messages: [...s.messages, aiMessage] } 
           : s
       ));
+
     } catch (error) {
       setApiError("I couldn't reach the advisor. Please check your connection.");
     } finally {
@@ -348,6 +396,14 @@ const Chat = () => {
             ))
           )}
         </div>
+
+        {/* --- LANGUAGE TOGGLE IN SIDEBAR FOOTER --- */}
+        <div className="p-4 border-t border-border/50 bg-background/50 backdrop-blur-sm">
+          <LanguageSelector 
+            selectedLanguage={selectedLanguage} 
+            onLanguageChange={(lang) => setSelectedLanguage(lang as LanguageCode)} 
+          />
+        </div>
       </aside>
 
       {/* Main Chat Area */}
@@ -417,14 +473,6 @@ const Chat = () => {
                   />
                   
                   <div className="flex items-center gap-3 shrink-0">
-                    <div className="w-28 hidden sm:block">
-                      <LanguageSelector 
-                        selectedLanguage={selectedLanguage} 
-                        onLanguageChange={(lang) => setSelectedLanguage(lang as LanguageCode)} 
-                        variant="glass"
-                      />
-                    </div>
-                    
                     <button 
                       type="button"
                       onClick={toggleRecording} 
@@ -463,14 +511,44 @@ const Chat = () => {
             <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
               {messages.map((m) => (
                 <div key={m.id} className={`flex gap-3 ${m.role === "user" ? "flex-row-reverse" : ""}`}>
+                  
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${m.role === "user" ? "bg-secondary/20" : "bg-primary/10"}`}>
                     {m.role === "user" ? <User className="w-4 h-4 text-secondary" /> : <Bot className="w-4 h-4 text-primary" />}
                   </div>
-                  <div className={`max-w-[80%] rounded-2xl px-4 py-3 shadow-sm ${m.role === "user" ? "bg-secondary text-secondary-foreground rounded-br-2xl rounded-tr-sm" : "bg-muted text-foreground rounded-bl-2xl rounded-tl-sm border border-border/50"}`}>
-                    <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{m.content}</p>
+                  
+                  <div className={`max-w-[80%] flex flex-col gap-1.5 min-w-0 ${m.role === "user" ? "items-end" : "items-start"}`}>
+                    <div className={`rounded-2xl px-4 py-3 shadow-sm max-w-full overflow-hidden ${m.role === "user" ? "bg-secondary text-secondary-foreground rounded-br-2xl rounded-tr-sm" : "bg-muted text-foreground rounded-bl-2xl rounded-tl-sm border border-border/50"}`}>
+                      <p className="text-sm leading-relaxed whitespace-pre-wrap break-words break-all">{m.content}</p>
+                    </div>
+                    
+                    {/* TRANSLATED READ ALOUD BUTTON FOR AI MESSAGES */}
+                    {m.role === "assistant" && (
+                      <button 
+                        onClick={() => toggleSpeech(m.content, m.id)}
+                        className={`flex items-center gap-1.5 text-xs font-medium px-2 py-1 rounded-full transition-colors ${
+                          speakingId === m.id 
+                            ? "text-primary bg-primary/10 animate-pulse" 
+                            : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                        }`}
+                      >
+                        {speakingId === m.id ? (
+                          <>
+                            <VolumeX className="w-3.5 h-3.5" /> 
+                            {ttsLabels.stopReading[selectedLanguage as keyof typeof ttsLabels.stopReading] || ttsLabels.stopReading.en}
+                          </>
+                        ) : (
+                          <>
+                            <Volume2 className="w-3.5 h-3.5" /> 
+                            {ttsLabels.readAloud[selectedLanguage as keyof typeof ttsLabels.readAloud] || ttsLabels.readAloud.en}
+                          </>
+                        )}
+                      </button>
+                    )}
                   </div>
+
                 </div>
               ))}
+
               {isLoading && (
                 <div className="flex gap-3">
                   <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
@@ -506,14 +584,6 @@ const Chat = () => {
               />
               
               <div className="flex items-center gap-3 shrink-0">
-                <div className="w-28 hidden sm:block">
-                  <LanguageSelector 
-                    selectedLanguage={selectedLanguage} 
-                    onLanguageChange={(lang) => setSelectedLanguage(lang as LanguageCode)} 
-                    variant="glass"
-                  />
-                </div>
-
                 <button 
                   type="button"
                   onClick={toggleRecording} 
