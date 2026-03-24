@@ -8,10 +8,10 @@ const API_BASE_URL = "https://mrcahrles00-agriwise-backend.hf.space";
 export async function getAgriculturalAdvice(
   userQuery: string,
   language: string,
-  tts: boolean = false
+  tts: boolean = false,
+  signal?: AbortSignal // <-- NEW: Accepts the kill switch signal from the Stop button
 ): Promise<{ response: string; audio_base64?: string; language: string }> {
   // ALWAYS use "auto" for backend — let it auto-detect user's language
-  // selectedLanguage is ONLY for UI language, not for query translation
   const effectiveLang = "auto";
 
   try {
@@ -22,9 +22,10 @@ export async function getAgriculturalAdvice(
       },
       body: JSON.stringify({
         query: userQuery,
-        language: effectiveLang,  // ← Always "auto"
+        language: effectiveLang,
         tts: tts,
       }),
+      signal: signal, // <-- NEW: Attaches the kill switch to the network request
     });
 
     if (!response.ok) {
@@ -46,7 +47,12 @@ export async function getAgriculturalAdvice(
     }
 
     throw new Error("No response from API");
-  } catch (error) {
+  } catch (error: any) {
+    // NEW: If the user clicked "Stop generating", throw the error so the frontend knows to fail silently
+    if (error.name === 'AbortError') {
+      throw error;
+    }
+    
     console.error("Agricultural Advice Error:", error);
     return {
       response: getFallbackResponse(userQuery, "auto"),
