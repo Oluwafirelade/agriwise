@@ -9,10 +9,11 @@ export async function getAgriculturalAdvice(
   userQuery: string,
   language: string,
   tts: boolean = false,
-  signal?: AbortSignal // <-- NEW: Accepts the kill switch signal from the Stop button
+  signal?: AbortSignal // <-- Accepts the kill switch signal from the Stop button
 ): Promise<{ response: string; audio_base64?: string; language: string }> {
-  // ALWAYS use "auto" for backend — let it auto-detect user's language
-  const effectiveLang = "auto";
+  
+  // FIX: Use the selected language from the frontend, default to "auto" if missing
+  const effectiveLang = language || "auto";
 
   try {
     const response = await fetch(`${API_BASE_URL}/api/agricultural-advice`, {
@@ -22,10 +23,10 @@ export async function getAgriculturalAdvice(
       },
       body: JSON.stringify({
         query: userQuery,
-        language: effectiveLang,
+        language: effectiveLang, // Now passes the correct language code!
         tts: tts,
       }),
-      signal: signal, // <-- NEW: Attaches the kill switch to the network request
+      signal: signal, // Attaches the kill switch to the network request
     });
 
     if (!response.ok) {
@@ -38,7 +39,7 @@ export async function getAgriculturalAdvice(
       return {
         response: data.response,
         audio_base64: data.audio_base64,
-        language: data.language || "auto",
+        language: data.language || effectiveLang,
       };
     }
 
@@ -48,15 +49,17 @@ export async function getAgriculturalAdvice(
 
     throw new Error("No response from API");
   } catch (error: any) {
-    // NEW: If the user clicked "Stop generating", throw the error so the frontend knows to fail silently
+    // If the user clicked "Stop generating", throw the error so the frontend knows to fail silently
     if (error.name === 'AbortError') {
       throw error;
     }
     
     console.error("Agricultural Advice Error:", error);
+    
+    // FIX: Pass the effectiveLang to the fallback so it replies in the right language
     return {
-      response: getFallbackResponse(userQuery, "auto"),
-      language: "auto",
+      response: getFallbackResponse(userQuery, effectiveLang),
+      language: effectiveLang,
     };
   }
 }
