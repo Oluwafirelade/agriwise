@@ -397,9 +397,8 @@ const Chat = () => {
     abortControllerRef.current = controller;
 
     try {
-      // NOTE: Removed `true` parameter to stop forcing backend audio generation 
-      // since we're using native browser TTS now.
-      const result = await getAgriculturalAdvice(messageText, "auto", false, controller.signal);
+      // NOTE: Passing selectedLanguage instead of "auto" to respect the dropdown choice
+      const result = await getAgriculturalAdvice(messageText, selectedLanguage, false, controller.signal);
       const aiResponse = result.response;
       
       const aiMessage: Message = {
