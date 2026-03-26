@@ -69,32 +69,30 @@ const detectLanguage = (text: string): LanguageCode | null => {
   if (/[ịụñ]/i.test(lowerText)) return "ig";
   if (/[ƙɓɗƴ]/i.test(lowerText)) return "ha";
 
-  const yorubaWords = [
-    'bawo', 'kini', 'ese', 'jowo', 'ejo', 'nibo', 'ti', 'ni', 'awon', 'fun', 'eyi', 
+ const yorubaWords = [
+    'bawo', 'kini', 'ese', 'jowo', 'ejo', 'nibo', 'awon', 'eyi', 
     'agbado', 'ewe', 'ẹgẹ', 'ege', 'tomati', 'oko', 'omi', 'ile', 'ilẹ', 'irugbin', 
-    'ajile', 'kokoro', 'arun', 'ojo', 'gbin', 'ogede', 'ọgẹdẹ', 'isu', 'iṣu', 'mo', 
-    'o', 'a', 'won', 'wa', 'lo', 'se', 'pe', 'bi', 'ko', 'ki', 'igi', 'eruku', 
-    'oorun', 'ikore', 'ewekọ', 'ewa', 'iresi', 'ata', 'alubosa', 'eja', 'eran', 
-    'maluu', 'ewure', 'adie', 'gbingbin', 'tutu', 'gbigbe', 'rirun'
+    'ajile', 'kokoro', 'arun', 'ojo', 'gbin', 'ogede', 'ọgẹdẹ', 'isu', 'iṣu', 
+    'igi', 'eruku', 'oorun', 'ikore', 'ewekọ', 'ewa', 'iresi', 'ata', 'alubosa', 
+    'eja', 'eran', 'maluu', 'ewure', 'adie', 'gbingbin', 'tutu', 'gbigbe', 'rirun'
   ];
 
   const igboWords = [
-    'kedu', 'biko', 'nno', 'daalu', 'olee', 'maka', 'nke', 'na', 'bu', 'akwukwo', 
+    'kedu', 'biko', 'nno', 'daalu', 'olee', 'maka', 'nke', 'akwukwo', 
     'akwụkwọ', 'ugbo', 'akpu', 'akpụ', 'unere', 'ala', 'mmiri', 'osisi', 'ahuhu', 
-    'ahụhụ', 'oria', 'ọrịa', 'ozuzo', 'iku', 'ịkụ', 'ji', 'oka', 'ọka', 'm', 'i', 
-    'ha', 'di', 'ga', 'bia', 'mee', 'ya', 'anwu', 'ifufe', 'aja', 'mkpuru', 
-    'iwewe', 'ahia', 'ede', 'agwa', 'osikapa', 'ose', 'yabasi', 'yabasị', 'azu', 
-    'anu', 'ehi', 'ewu', 'okuko', 'okochi', 'ọkọchị', 'udu'
+    'ahụhụ', 'oria', 'ọrịa', 'ozuzo', 'iku', 'ịkụ', 'ji', 'oka', 'ọka', 
+    'anwu', 'ifufe', 'aja', 'mkpuru', 'iwewe', 'ahia', 'ede', 'agwa', 'osikapa', 
+    'ose', 'yabasi', 'yabasị', 'azu', 'anu', 'ehi', 'ewu', 'okuko', 'okochi', 
+    'ọkọchị', 'udu'
   ];
 
   const hausaWords = [
     'ina', 'yaya', 'sannu', 'godiya', 'don', 'gaskiya', 'kuma', 'wannan', 'cikin', 
-    'da', 'ganyen', 'rogo', 'masara', 'kasa', 'ruwa', 'shuka', 'taki', 'kwari', 
-    'cuta', 'sama', 'doya', 'tumatur', 'dasa', 'noma', 'amfanin', 'na', 'ka', 'ki', 
-    'ya', 'ta', 'su', 'muna', 'suna', 'ne', 'ce', 'ba', 'yi', 'zo', 'tafi', 
-    'yadda', 'me', 'rana', 'iska', 'zafi', 'sanyi', 'girbi', 'kasuwa', 'wake', 
-    'shinkafa', 'barkono', 'albasa', 'kifi', 'nama', 'saniya', 'akuya', 'kaza', 
-    'rani', 'damina', 'iri', 'gona'
+    'ganyen', 'rogo', 'masara', 'kasa', 'ruwa', 'shuka', 'taki', 'kwari', 
+    'cuta', 'sama', 'doya', 'tumatur', 'dasa', 'noma', 'amfanin', 'yadda', 
+    'rana', 'iska', 'zafi', 'sanyi', 'girbi', 'kasuwa', 'wake', 'shinkafa', 
+    'barkono', 'albasa', 'kifi', 'nama', 'saniya', 'akuya', 'kaza', 'rani', 
+    'damina', 'iri', 'gona'
   ];
 
   const englishWords = [
