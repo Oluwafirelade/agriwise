@@ -65,10 +65,14 @@ const getLanguageCode = (lang: string) => {
 const detectLanguage = (text: string): LanguageCode | null => {
   const lowerText = text.toLowerCase();
   
-  if (/[ẹọṣ]/i.test(lowerText)) return "yo";
-  if (/[ịụñ]/i.test(lowerText)) return "ig";
+ // 'ẹ' and 'ṣ' are unique to Yoruba
+  if (/[ẹṣ]/i.test(lowerText)) return "yo"; 
+  
+  // 'ị', 'ụ', and 'ṅ' (or ñ) are unique to Igbo
+  if (/[ịụṅñ]/i.test(lowerText)) return "ig"; 
+  
+  // 'ƙ', 'ɓ', 'ɗ', 'ƴ' are unique to Hausa
   if (/[ƙɓɗƴ]/i.test(lowerText)) return "ha";
-
  const yorubaWords = [
     'bawo', 'kini', 'ese', 'jowo', 'ejo', 'nibo', 'awon', 'eyi', 
     'agbado', 'ewe', 'ẹgẹ', 'ege', 'tomati', 'oko', 'omi', 'ile', 'ilẹ', 'irugbin', 
