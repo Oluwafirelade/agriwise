@@ -1,7 +1,7 @@
 export const translations = {
   en: {
     // Header
-    headerBrand: "AgriAdvisor",
+    headerBrand: "Agrivisor",
     headerSubtitle: "Multilingual Farm Advisory",
     headerFeatures: "Features",
     headerHowItWorks: "How It Works",
@@ -43,7 +43,7 @@ export const translations = {
 
     // How It Works Section
     howItWorksLabel: "Simple Process",
-    howItWorksHeading: "How AgriAdvisor Works",
+    howItWorksHeading: "How Agrivisor Works",
     howItWorksSubheading: "From your question to expert advice all in seconds, in your own language.",
     howStep1Title: "Ask Your Question",
     howStep1Desc: "Type or speak your farming question in any supported language. Describe what you're seeing on your farm.",
@@ -65,7 +65,7 @@ export const translations = {
     languagesSubheading: "Breaking language barriers for Nigerian farmers. Our platform understands the major Nigerian languages, making agricultural knowledge accessible to all.",
 
     // Footer
-    footerBrand: "AgriAdvisor",
+    footerBrand: "Agrivisor",
     footerSubtitle: "Multilingual Farm Advisory",
     footerDescription: "Empowering Nigerian farmers with AI-powered agricultural guidance in their native languages.",
     footerQuickLinks: "Quick Links",
@@ -80,9 +80,9 @@ export const translations = {
     footerPestLibrary: "Pest & Disease Library",
     footerExtensionServices: "Extension Services",
     footerAddress: "Federal University of Agriculture, Abeokuta, Nigeria",
-    footerEmail: "info@agriadvisor.ng",
+    footerEmail: "info@Agrivisor.ng",
     footerPhone: "+234 801 234 5678",
-    footerCopyright: "© 2024 AgriAdvisor. All rights reserved.",
+    footerCopyright: "© 2024 Agrivisor. All rights reserved.",
     footerPrivacy: "Privacy Policy",
     footerTerms: "Terms of Service",
 
@@ -96,7 +96,7 @@ export const translations = {
   },
   ha: {
     // Header
-    headerBrand: "AgriAdvisor",
+    headerBrand: "Agrivisor",
     headerSubtitle: "Shawarar Noma Ta Harsuna Da Dama",
     headerFeatures: "Sifofin",
     headerHowItWorks: "Yaya Ya Ke Aiki",
@@ -138,7 +138,7 @@ export const translations = {
 
     // How It Works Section
     howItWorksLabel: "Tsarin Masyada",
-    howItWorksHeading: "Yaya AgriAdvisor Ya Ke Aiki",
+    howItWorksHeading: "Yaya Agrivisor Ya Ke Aiki",
     howItWorksSubheading: "Daga tambayarka zuwa shawarar jiya — duka a saƙonni, a harsunka.",
     howStep1Title: "Yi Tambaya",
     howStep1Desc: "Rubuta ko yi ambaton tambayar noma a duk harsuna da aka gaya. Bayyana abin da kake gani a gonar noma.",
@@ -160,7 +160,7 @@ export const translations = {
     languagesSubheading: "Karya hawa tsakani harsuna ga manoman Nigeria. Dandalin namu ta fahimci manyan harsuna na Nigeria, wanda ya sanya ilimin noma ga duka.",
 
     // Footer
-    footerBrand: "AgriAdvisor",
+    footerBrand: "Agrivisor",
     footerSubtitle: "Shawarar Noma Ta Harsuna Da Dama",
     footerDescription: "Taimaka wa manoman Nigeria da shawarar noma ta AI a cikin harsunsu.",
     footerQuickLinks: "Hanyoyin Mara Naka",
@@ -175,9 +175,9 @@ export const translations = {
     footerPestLibrary: "Kariya da Yawan Cutuka",
     footerExtensionServices: "Ayyukan Jiɓa",
     footerAddress: "Jami'ar Noma ta Nigeria, Abeokuta, Nigeria",
-    footerEmail: "info@agriadvisor.ng",
+    footerEmail: "info@Agrivisor.ng",
     footerPhone: "+234 801 234 5678",
-    footerCopyright: "© 2024 AgriAdvisor. Duk haƙƙi na karɓa.",
+    footerCopyright: "© 2024 Agrivisor. Duk haƙƙi na karɓa.",
     footerPrivacy: "Latar Keɓewa",
     footerTerms: "Sharatai na Aiki",
 
@@ -191,7 +191,7 @@ export const translations = {
   },
   yo: {
     // Header
-    headerBrand: "AgriAdvisor",
+    headerBrand: "Agrivisor",
     headerSubtitle: "Iṣewo Ilu Agbe Ẹ̀kúnrẹ̀rẹ̀",
     headerFeatures: "Ẹ̀ka",
     headerHowItWorks: "Báwo Ni O Ṣe Ṣiṣẹ́",
@@ -233,7 +233,7 @@ export const translations = {
 
     // How It Works Section
     howItWorksLabel: "Ọna Aladani",
-    howItWorksHeading: "Báwo Ni AgriAdvisor Ṣe Ṣiṣẹ́",
+    howItWorksHeading: "Báwo Ni Agrivisor Ṣe Ṣiṣẹ́",
     howItWorksSubheading: "Lati ibeere rẹ si iṣewo ọlọgbọn — ohun gbogbo ni iṣẹjú kekere, ni ede rẹ.",
     howStep1Title: "Beere Ibeere",
     howStep1Desc: "Kọ tabi sọ ibeere agbe ni duk ede ti a jẹ́ atilẹyin. Sọ nkan ti o ri lori agbẹ rẹ.",
@@ -255,7 +255,7 @@ export const translations = {
     languagesSubheading: "Tiparẹ̀ ẹkun ti ede fun awọn onigbe Nigeria. Ile nà ye ede ọrọ Nigeria, ti o fi imo agbe si gbogbo eniyan.",
 
     // Footer
-    footerBrand: "AgriAdvisor",
+    footerBrand: "Agrivisor",
     footerSubtitle: "Iṣewo Ilu Agbe Ẹ̀kúnrẹ̀rẹ̀",
     footerDescription: "Ṣe ẹranko fun awọn onigbe Nigeria pelu iṣewo agbe AI ni ede wọn.",
     footerQuickLinks: "Aladani Asiri",
@@ -270,9 +270,9 @@ export const translations = {
     footerPestLibrary: "Ilẹ Ẹranko ati Aran",
     footerExtensionServices: "Awọn Isẹ Tokunbo",
     footerAddress: "Jambụ Iṣẹ Agbe Nigeria, Abeokuta, Nigeria",
-    footerEmail: "info@agriadvisor.ng",
+    footerEmail: "info@Agrivisor.ng",
     footerPhone: "+234 801 234 5678",
-    footerCopyright: "© 2024 AgriAdvisor. Gbogbo etò ni a pa.",
+    footerCopyright: "© 2024 Agrivisor . Gbogbo etò ni a pa.",
     footerPrivacy: "Ileto Idaniloju",
     footerTerms: "Awọn Ọrọ Isedale",
 
@@ -286,7 +286,7 @@ export const translations = {
   },
   ig: {
     // Header
-    headerBrand: "AgriAdvisor",
+    headerBrand: "Agrivisor",
     headerSubtitle: "Nkwado Ọrụ Ugbo Ọtụtụ Asụsụ",
     headerFeatures: "Ngwụsi",
     headerHowItWorks: "Kedu Ka O Sị Akpaghazi",
@@ -328,7 +328,7 @@ export const translations = {
 
     // How It Works Section
     howItWorksLabel: "Usoro Dị Mfe",
-    howItWorksHeading: "Kedu Ka AgriAdvisor Sị Akpaghazi",
+    howItWorksHeading: "Kedu Ka Agrivisor Sị Akpaghazi",
     howItWorksSubheading: "Sitere na ajụjụ gị ruo nkwado ọlọ - ihe nile n'ime sekọnd, n'asụsụ gị.",
     howStep1Title: "Jụọ Ajụjụ",
     howStep1Desc: "Dee ma ọ bụ kwuo ajụjụ ọrụ ugbo na asụsụ ọ bụla a na-akwada. Gọkọta ihe ị hụrụ n'ubi gị.",
@@ -350,7 +350,7 @@ export const translations = {
     languagesSubheading: "Ikwu ngọngọ nke asụsụ maka ndị ọrụ ugbo Nigeria. Ngwa anyị na-aghọta ndị asụsụ bụ isi Nigeria, na-eme ka ihe ọmụmụ ọrụ ugbo dị mfe maka onye nile.",
 
     // Footer
-    footerBrand: "AgriAdvisor",
+    footerBrand: "Agrivisor",
     footerSubtitle: "Nkwado Ọrụ Ugbo Ọtụtụ Asụsụ",
     footerDescription: "Inyere ndị ọrụ ugbo Nigeria aka na nkwado ọrụ ugbo AI n'asụsụ ha.",
     footerQuickLinks: "Njikọ Ngwa",
@@ -365,9 +365,9 @@ export const translations = {
     footerPestLibrary: "Ụlọ Akwụkwọ Ụmụ Irunwa na Ọrịa",
     footerExtensionServices: "Ọrụ Mgbasanya",
     footerAddress: "Mahadum Ọrụ Ugbo Nigeria, Abeokuta, Nigeria",
-    footerEmail: "info@agriadvisor.ng",
+    footerEmail: "info@Agrivisor.ng",
     footerPhone: "+234 801 234 5678",
-    footerCopyright: "© 2024 AgriAdvisor. Nkwere ihe nile.",
+    footerCopyright: "© 2024 Agrivisor. Nkwere ihe nile.",
     footerPrivacy: "Nchikota Nzuzo",
     footerTerms: "Usoro Iji",
 

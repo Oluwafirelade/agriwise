@@ -30,7 +30,7 @@ export function Footer() {
               </div>
               <div>
                 <span className="font-display font-bold text-xl text-sidebar-foreground">
-                  AgriAdvisor
+                  Agrivisor
                 </span>
                 <p className="text-xs text-sidebar-foreground/60">
                   Multilingual Farm Advisory
@@ -109,8 +109,8 @@ export function Footer() {
               </li>
               <li className="flex items-center gap-3">
                 <Mail className="w-5 h-5 text-sidebar-primary" />
-                <a href="mailto:info@agriadvisor.ng" className="text-sm text-sidebar-foreground/70 hover:text-sidebar-primary transition-colors">
-                  info@agriadvisor.ng
+                <a href="mailto:info@Agrivisor.ng" className="text-sm text-sidebar-foreground/70 hover:text-sidebar-primary transition-colors">
+                  info@Agrivisor.ng
                 </a>
               </li>
               <li className="flex items-center gap-3">
@@ -127,7 +127,7 @@ export function Footer() {
         <div className="mt-12 pt-8 border-t border-sidebar-border">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-sm text-sidebar-foreground/60">
-              © 2025 AgriAdvisor. All rights reserved.
+              © 2025 Agrivisor. All rights reserved.
             </p>
           </div>
         </div>

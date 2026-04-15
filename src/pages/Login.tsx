@@ -141,7 +141,7 @@ const Login = () => {
           </h1>
           <p className="text-sm text-muted-foreground mt-2">
             {isSignUp
-              ? "Join AgriAdvisor to get personalized farming advice."
+              ? "Join Agrivisor to get personalized farming advice."
               : "Sign in to continue your farming journey."}
           </p>
         </header>
@@ -311,7 +311,7 @@ const Login = () => {
         {/* Footer Links */}
         <footer className="mt-8 text-center">
           <p className="text-xs text-muted-foreground leading-relaxed">
-            By continuing, you agree to AgriAdvisor's <br />
+            By continuing, you agree to Agrivisor's <br />
             <a href="#" className="text-foreground hover:underline font-medium">Terms of Service</a> and{" "}
             <a href="#" className="text-foreground hover:underline font-medium">Privacy Policy</a>.
           </p>

@@ -63,7 +63,7 @@ export function Header({ selectedLanguage, onLanguageChange, onStartChat }: Head
             </div>
             <div className="flex flex-col">
               <span className="font-display font-bold text-lg md:text-xl text-foreground">
-                AgriAdvisor
+               Agrivisor
               </span>
               <span className="text-xs text-muted-foreground hidden sm:block">
                 Multilingual Farm Advisory
